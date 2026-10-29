@@ -1,5 +1,9 @@
 # Vibenance
 
+<p align="center">
+  <img src=".github/assets/feature_graphic.png" width="800" alt="Vibenance Feature Graphic" />
+</p>
+
 Cliente móvil **no oficial** para [Firefly III](https://github.com/firefly-iii/firefly-iii),
 el gestor de finanzas personales libre y de código abierto.
 
@@ -26,6 +30,12 @@ Este proyecto parte de [**waterfly-iii**](https://github.com/dreautall/waterfly-
   rápidamente.
 - 🌍 **Multi-idioma** — 25 idiomas heredados del proyecto original, con interfaz principal
   en español.
+
+## Capturas de pantalla
+
+| Movimientos | Análisis | Evolución |
+| :-: | :-: | :-: |
+| <img src=".github/assets/screen_transactions.png" width="250" /> | <img src=".github/assets/screen_analysis.png" width="250" /> | <img src=".github/assets/screen_evolution.png" width="250" /> |
 
 ## Compilación
 

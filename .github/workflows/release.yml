@@ -18,6 +18,17 @@ on:
         options:
           - "stable"
           - "beta"
+      play_track:
+        description: "Canal de Google Play (auto, internal, alpha, beta, production)"
+        required: false
+        default: "auto"
+        type: choice
+        options:
+          - "auto"
+          - "internal"
+          - "alpha"
+          - "beta"
+          - "production"
 
 env:
   PROPERTIES_PATH: "./android/key.properties"
@@ -255,6 +266,91 @@ jobs:
           draft: false
           prerelease: ${{ steps.prepare.outputs.is_prerelease == 'true' }}
           generate_release_notes: true
+
+      - name: Preparar notas de versión y detectar canal activo de Google Play
+        id: play_config
+        if: steps.versioning.outputs.channel == 'stable'
+        env:
+          SA_JSON: ${{ secrets.PLAY_STORE_SERVICE_ACCOUNT_JSON }}
+          INPUT_TRACK: ${{ inputs.play_track }}
+        run: |
+          mkdir -p whatsnew
+          cp fastlane/metadata/android/es-ES/changelogs/1.txt whatsnew/whatsnew-es-ES
+          cp fastlane/metadata/android/en-US/changelogs/1.txt whatsnew/whatsnew-en-US
+
+          PLAY_TRACK=$(python3 - << 'EOF'
+          import json, os, time, base64, urllib.request, subprocess
+
+          inp = os.environ.get('INPUT_TRACK', '').strip()
+          if inp and inp != 'auto':
+              print(inp)
+              raise SystemExit(0)
+
+          try:
+              sa = json.loads(os.environ['SA_JSON'])
+              now = int(time.time())
+              hdr = base64.urlsafe_b64encode(json.dumps({'alg': 'RS256', 'typ': 'JWT'}).encode()).rstrip(b'=')
+              pld = base64.urlsafe_b64encode(json.dumps({
+                  'iss': sa['client_email'],
+                  'scope': 'https://www.googleapis.com/auth/androidpublisher',
+                  'aud': 'https://oauth2.googleapis.com/token',
+                  'iat': now,
+                  'exp': now + 3600
+              }).encode()).rstrip(b'=')
+              uns = hdr + b'.' + pld
+              with open('/tmp/sa_jwt.key', 'w') as kf:
+                  kf.write(sa['private_key'])
+              sig = subprocess.check_output(['openssl', 'dgst', '-sha256', '-sign', '/tmp/sa_jwt.key'], input=uns)
+              os.remove('/tmp/sa_jwt.key')
+              jwt_tok = (uns + b'.' + base64.urlsafe_b64encode(sig).rstrip(b'=')).decode()
+              req = urllib.request.Request(
+                  'https://oauth2.googleapis.com/token',
+                  data=f'grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer&assertion={jwt_tok}'.encode(),
+                  headers={'Content-Type': 'application/x-www-form-urlencoded'}
+              )
+              tok = json.loads(urllib.request.urlopen(req).read().decode())['access_token']
+              h = {'Authorization': f'Bearer {tok}', 'Content-Type': 'application/json'}
+              r_ed = urllib.request.urlopen(urllib.request.Request(
+                  'https://androidpublisher.googleapis.com/androidpublisher/v3/applications/com.vibingdroid.vibenance/edits',
+                  data=b'{}', headers=h, method='POST'
+              ))
+              edit_id = json.loads(r_ed.read().decode())['id']
+              r_tr = urllib.request.urlopen(urllib.request.Request(
+                  f'https://androidpublisher.googleapis.com/androidpublisher/v3/applications/com.vibingdroid.vibenance/edits/{edit_id}/tracks',
+                  headers=h
+              ))
+              tracks = {t['track']: t.get('releases', []) for t in json.loads(r_tr.read().decode()).get('tracks', [])}
+              urllib.request.urlopen(urllib.request.Request(
+                  f'https://androidpublisher.googleapis.com/androidpublisher/v3/applications/com.vibingdroid.vibenance/edits/{edit_id}',
+                  headers=h, method='DELETE'
+              ))
+              chosen = 'internal'
+              for candidate in ['production', 'beta', 'alpha', 'internal']:
+                  rels = tracks.get(candidate, [])
+                  if any(rel.get('status') in ('completed', 'inProgress', 'halted') for rel in rels):
+                      chosen = candidate
+                      break
+              print(chosen)
+          except Exception:
+              print('internal')
+          EOF
+          )
+          echo "Detected Play Store track: $PLAY_TRACK"
+          echo "track=$PLAY_TRACK" >> $GITHUB_OUTPUT
+
+      - name: Publicar AAB en Google Play Store
+        if: |
+          steps.versioning.outputs.channel == 'stable' &&
+          (startsWith(github.ref, 'refs/tags/') || github.event_name == 'release' || github.event_name == 'workflow_dispatch')
+        continue-on-error: true
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.PLAY_STORE_SERVICE_ACCOUNT_JSON }}
+          packageName: com.vibingdroid.vibenance
+          releaseFiles: dist/vibenance-play-release.aab
+          track: ${{ steps.play_config.outputs.track }}
+          status: completed
+          whatsNewDirectory: whatsnew
 
       - name: Actualizar version.json en el repositorio
         if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'release' || github.event_name == 'workflow_dispatch'
