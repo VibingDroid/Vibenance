@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" width="100%" height="100%">
+  <defs>
+    <!-- Degradado diagonal de cian a violeta -->
+    <linearGradient id="bg-gradient" x1="12%" y1="12%" x2="88%" y2="88%">
+      <stop offset="0%" stop-color="#00CED8" />
+      <stop offset="50%" stop-color="#4374F8" />
+      <stop offset="100%" stop-color="#8C38FF" />
+    </linearGradient>
+  </defs>
+
+  <!-- Círculo principal ocupando el 100% del lienzo -->
+  <circle cx="500" cy="500" r="500" fill="url(#bg-gradient)" />
+
+  <!-- Barras blancas redondeadas escaladas en proporción -->
+  <g fill="#FFFFFF">
+    <!-- Barra izquierda -->
+    <rect x="212" y="383.5" width="127" height="233" rx="63.5" />
+    <!-- Barra central -->
+    <rect x="403" y="299" width="127" height="402" rx="63.5" />
+    <!-- Barra derecha -->
+    <rect x="593.5" y="214" width="127" height="572" rx="63.5" />
+  </g>
+</svg>

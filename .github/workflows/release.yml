@@ -1,0 +1,274 @@
+name: Build and Release
+
+on:
+  release:
+    types:
+      - created
+      - published
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      channel:
+        description: "Canal de lanzamiento (stable o beta)"
+        required: true
+        default: "stable"
+        type: choice
+        options:
+          - "stable"
+          - "beta"
+
+env:
+  PROPERTIES_PATH: "./android/key.properties"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  check:
+    name: Code Check
+    if: github.event_name != 'push' || !startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter environment
+        uses: ./.github/actions/setup_env
+        with:
+          java-version: 17.x
+
+      - name: Check for any formatting issues
+        run: dart format --set-exit-if-changed .
+
+      - name: Statically analyze the Dart code
+        run: dart analyze .
+
+      - name: Run flutter tests
+        run: flutter test
+
+  build:
+    runs-on: ubuntu-latest
+    if: |
+      always() &&
+      !contains(github.event.head_commit.message, '[skip build]') &&
+      (needs.check.result == 'success' || needs.check.result == 'skipped')
+    needs: [check]
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter environment
+        uses: ./.github/actions/setup_env
+        with:
+          java-version: 17.x
+
+      - name: Ajustar memoria de Gradle para el runner
+        run: |
+          sed -i 's/-Xmx8G/-Xmx4g/; s/MaxMetaspaceSize=4G/MaxMetaspaceSize=1g/' \
+            android/gradle.properties
+          echo "org.gradle.workers.max=2" >> android/gradle.properties
+          cat android/gradle.properties
+
+      - name: Generate keystore from base64 secret
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+        run: |
+          echo "$KEYSTORE_BASE64" | base64 --decode > "${{ runner.temp }}/upload-keystore.jks"
+
+      - name: Create key.properties file for signing
+        run: |
+          echo "storeFile=${{ runner.temp }}/upload-keystore.jks" > ${{ env.PROPERTIES_PATH }}
+          echo "storePassword=${{ secrets.STORE_PASSWORD }}" >> ${{ env.PROPERTIES_PATH }}
+          echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> ${{ env.PROPERTIES_PATH }}
+          echo "keyAlias=upload" >> ${{ env.PROPERTIES_PATH }}
+
+      - name: Set version and build number
+        id: versioning
+        run: |
+          TAG_NAME="${{ github.ref_name }}"
+          INPUT_CHANNEL="${{ inputs.channel }}"
+          PUBSPEC_VER=$(grep '^version: ' pubspec.yaml | sed 's/version: //')
+          PUBSPEC_BUILD=$(echo "$PUBSPEC_VER" | cut -s -d'+' -f2)
+
+          if [[ -n "$INPUT_CHANNEL" ]]; then
+            CHANNEL="$INPUT_CHANNEL"
+          elif [[ "$TAG_NAME" =~ -beta|-rc|-alpha || "$TAG_NAME" == "beta" ]]; then
+            CHANNEL="beta"
+          else
+            CHANNEL="stable"
+          fi
+
+          if [[ -z "$TAG_NAME" || "$TAG_NAME" == "main" || "$TAG_NAME" == "develop" || "$TAG_NAME" == "beta" ]]; then
+            TAG_NAME="v$(echo "$PUBSPEC_VER" | cut -d'+' -f1)"
+          fi
+          CLEAN_VER=$(echo "$TAG_NAME" | sed 's/^v//' | cut -d'+' -f1)
+          TAG_BUILD=$(echo "$TAG_NAME" | cut -s -d'+' -f2)
+          if [[ -n "$TAG_BUILD" ]]; then
+            BUILD_CODE="$TAG_BUILD"
+          elif [[ -n "$PUBSPEC_BUILD" ]]; then
+            BUILD_CODE="$PUBSPEC_BUILD"
+          else
+            BUILD_CODE=${{ github.run_number }}
+          fi
+          sed -i "s/^version: .*/version: $CLEAN_VER+$BUILD_CODE/" pubspec.yaml
+          mkdir -p dist
+          echo "channel=$CHANNEL" >> $GITHUB_OUTPUT
+          echo "flavor=$CHANNEL" >> $GITHUB_OUTPUT
+          echo "tag=$TAG_NAME" >> $GITHUB_OUTPUT
+          echo "version=$CLEAN_VER" >> $GITHUB_OUTPUT
+          echo "build_code=$BUILD_CODE" >> $GITHUB_OUTPUT
+
+      - name: Generate localization files
+        run: mkdir -p build && flutter gen-l10n
+
+      - name: Build Beta APKs (Flavor beta verification)
+        if: steps.versioning.outputs.channel == 'stable'
+        run: |
+          flutter build apk \
+            --flavor beta \
+            --obfuscate \
+            --split-debug-info=build/app/outputs/symbols/apk-beta \
+            --release \
+            --split-per-abi \
+            --dart-define=cronetHttpNoPlay=true
+          ls -lh build/app/outputs/flutter-apk/
+
+      - name: Build APKs (Flavor ${{ steps.versioning.outputs.flavor }})
+        run: |
+          CHANNEL="${{ steps.versioning.outputs.channel }}"
+          PREFIX="$([[ "$CHANNEL" == "beta" ]] && echo vibenance-beta || echo vibenance)"
+          flutter build apk \
+            --flavor ${{ steps.versioning.outputs.flavor }} \
+            --obfuscate \
+            --split-debug-info=build/app/outputs/symbols/apk-${{ steps.versioning.outputs.flavor }} \
+            --release \
+            --split-per-abi \
+            --dart-define=cronetHttpNoPlay=true
+          ls -lh build/app/outputs/flutter-apk/
+          cp $(find build/app/outputs/flutter-apk/ -name "*arm64-v8a*release.apk" | head -n 1) "dist/${PREFIX}-arm64-v8a.apk"
+          cp $(find build/app/outputs/flutter-apk/ -name "*armeabi-v7a*release.apk" | head -n 1) "dist/${PREFIX}-armeabi-v7a.apk"
+          cp $(find build/app/outputs/flutter-apk/ -name "*x86_64*release.apk" | head -n 1) "dist/${PREFIX}-x86_64.apk"
+
+      - name: Build Play Store App Bundle (Flavor play)
+        if: steps.versioning.outputs.channel == 'stable'
+        run: |
+          flutter build appbundle \
+            --flavor play \
+            --obfuscate \
+            --split-debug-info=build/app/outputs/symbols/bundle-play \
+            --release \
+            --dart-define=DISABLE_SELF_UPDATER=true \
+            --dart-define=cronetHttpNoPlay=true
+          ls -lh build/app/outputs/bundle/playRelease/
+          cp "build/app/outputs/bundle/playRelease/app-play-release.aab" "dist/vibenance-play-release.aab"
+
+      - name: Preparar artefactos y version.json
+        id: prepare
+        run: |
+          CHANNEL="${{ steps.versioning.outputs.channel }}"
+          VERSION="${{ steps.versioning.outputs.version }}"
+          BUILD_CODE="${{ steps.versioning.outputs.build_code }}"
+          TAG="${{ steps.versioning.outputs.tag }}"
+
+          if [[ "$CHANNEL" == "beta" ]]; then
+            PREFIX="vibenance-beta"
+            APP_DISPLAY_NAME="Vibenance Beta"
+            IS_PRERELEASE="true"
+          else
+            PREFIX="vibenance"
+            APP_DISPLAY_NAME="Vibenance"
+            IS_PRERELEASE="false"
+          fi
+
+          UPDATE_URL_BASE="https://github.com/${{ github.repository }}/releases/download/${TAG}"
+          export UPDATE_URL_BASE
+          export GITHUB_REPOSITORY="${{ github.repository }}"
+
+          python3 - << 'EOF'
+          import json, os, re
+
+          version = "${{ steps.versioning.outputs.version }}"
+          build_code = "${{ steps.versioning.outputs.build_code }}"
+          arm64_code = int(build_code) * 10 + 3
+          channel = "${{ steps.versioning.outputs.channel }}"
+          prefix = "vibenance-beta" if channel == "beta" else "vibenance"
+          update_url_base = os.environ.get("UPDATE_URL_BASE", f"https://github.com/{os.environ.get('GITHUB_REPOSITORY', 'VibingDroid/Vibenance')}/releases/download/${{ steps.versioning.outputs.tag }}")
+          display_name = "Vibenance Beta" if channel == "beta" else "Vibenance"
+
+          changelog = ""
+          if os.path.exists("CHANGELOG.md"):
+              with open("CHANGELOG.md", "r", encoding="utf-8") as f:
+                  content = f.read()
+              pattern = rf"##\s*\[?{re.escape(version)}\]?[^\n]*\n([\s\S]*?)(?=\n##\s|\Z)"
+              match = re.search(pattern, content)
+              if match:
+                  changelog = match.group(1).strip()
+
+          if not changelog:
+              changelog = f"Versión {channel} {version} de {display_name}."
+
+          data = {
+              "version": f"{version} (build {build_code})",
+              "versionCode": arm64_code,
+              "apkUrl": f"{update_url_base}/{prefix}-arm64-v8a.apk",
+              "changelog": changelog
+          }
+
+          with open("dist/version.json", "w", encoding="utf-8") as f:
+              json.dump(data, f, indent=2, ensure_ascii=False)
+              f.write("\n")
+
+          with open("release_notes.txt", "w", encoding="utf-8") as f:
+              f.write(changelog)
+          EOF
+
+          echo "is_prerelease=$IS_PRERELEASE" >> $GITHUB_OUTPUT
+          echo "prefix=$PREFIX" >> $GITHUB_OUTPUT
+          echo "display_name=$APP_DISPLAY_NAME" >> $GITHUB_OUTPUT
+          ls -lh dist/
+          cat dist/version.json
+
+      - name: Subir APKs y AAB como artefactos
+        uses: actions/upload-artifact@v4
+        continue-on-error: true
+        with:
+          name: ${{ steps.prepare.outputs.prefix }}-release-artifacts
+          retention-days: 3
+          path: dist/*
+
+      - name: Publicar en GitHub Release
+        if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'release' || github.event_name == 'workflow_dispatch'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.versioning.outputs.tag }}
+          files: dist/*
+          name: ${{ steps.prepare.outputs.display_name }} v${{ steps.versioning.outputs.version }}
+          body_path: release_notes.txt
+          draft: false
+          prerelease: ${{ steps.prepare.outputs.is_prerelease == 'true' }}
+          generate_release_notes: true
+
+      - name: Actualizar version.json en el repositorio
+        if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'release' || github.event_name == 'workflow_dispatch'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          TARGET_BRANCH="main"
+          TARGET_FILE="${{ steps.versioning.outputs.channel == 'beta' && 'version-beta.json' || 'version.json' }}"
+          cp dist/version.json "${{ runner.temp }}/version_to_sync.json"
+          git fetch origin $TARGET_BRANCH:$TARGET_BRANCH || true
+          git checkout -f $TARGET_BRANCH
+          cp "${{ runner.temp }}/version_to_sync.json" "$TARGET_FILE"
+          git add "$TARGET_FILE"
+          if ! git diff --staged --quiet; then
+            git commit -m "chore(release): actualizar $TARGET_FILE para v${{ steps.versioning.outputs.version }} [skip ci]"
+            git push origin $TARGET_BRANCH
+          fi

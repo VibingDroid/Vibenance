@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "836671989697",
+    "project_id": "vibenance-7ab9c",
+    "storage_bucket": "vibenance-7ab9c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:836671989697:android:13ea826eea7fe3caac3140",
+        "android_client_info": {
+          "package_name": "com.vibingdroid.vibenance"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCLBJwqNo8jeZl7zCFqAFa4yvXBFnAAe9Y"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:836671989697:android:96db3080ab783a53ac3140",
+        "android_client_info": {
+          "package_name": "com.vibingdroid.vibenance.beta"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCLBJwqNo8jeZl7zCFqAFa4yvXBFnAAe9Y"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
