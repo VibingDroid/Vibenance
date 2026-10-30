@@ -7,6 +7,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:vibenance/generated/swagger_fireflyiii_api/firefly_iii.swagger.dart';
+import 'package:vibenance/utils/bank_detector.dart';
 import 'package:vibenance/generated/swagger_fireflyiii_api/firefly_iii.enums.swagger.dart'
     as enums;
 
@@ -250,19 +251,11 @@ class CsvExportService {
         ownAccount?.attributes.iban ??
         split.sourceIban ??
         split.destinationIban;
-    final String combined =
-        '${name.toLowerCase()} ${iban?.toLowerCase() ?? ''}';
 
-    if (combined.contains('bbva')) return 'BBVA';
-    if (combined.contains('santander')) return 'Santander';
-    if (combined.contains('caixa') || combined.contains('imagin')) {
-      return 'CaixaBank';
+    final BankInfo? bank = detectBank(name, iban);
+    if (bank != null) {
+      return bank.fullName;
     }
-    if (combined.contains('ing')) return 'ING';
-    if (combined.contains('sabadell')) return 'Banco Sabadell';
-    if (combined.contains('openbank')) return 'Openbank';
-    if (combined.contains('revolut')) return 'Revolut';
-    if (combined.contains('bankinter')) return 'Bankinter';
 
     return name.isNotEmpty ? name : 'Entidad';
   }
