@@ -1,0 +1,1 @@
+Corrección del icono adaptativo (degradado de marca), capturas de Play Store actualizadas y pipeline de publicación automática.

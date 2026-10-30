@@ -1,0 +1,1 @@
+Fixed adaptive app icon (brand gradient), updated Play Store screenshots and automated Play Store publishing pipeline.
