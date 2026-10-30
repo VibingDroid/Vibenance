@@ -1,6 +1,13 @@
 # Changelog
 
-Todas las novedades notables de Vibance se documentan en este archivo.
+Todas las novedades notables de Vibenance se documentan en este archivo.
+
+## [1.0.2] - 2026-10-30
+
+### Nuevas características
+- **Insignias y colores corporativos de bancos:** soporte para más de 20 bancos y neobancos que operan en España (BBVA, Santander, CaixaBank, ING, Sabadell, Bankinter, Revolut, Openbank, N26, MyInvestor, Trade Republic, etc.) con sus colores oficiales y siglas.
+- **Detección inteligente de entidad:** identificación prioritaria por los 4 dígitos de entidad del código IBAN español (`ESxxEEEE...`), con fallback automático por palabras clave en el nombre de la cuenta cuando el IBAN no esté presente o sea extranjero.
+- **Exportación CSV unificada:** la columna "Entidad" en la exportación de transacciones reutiliza la misma lógica de detección que las insignias visuales.
 
 ## [1.0.1] - 2026-10-30
 

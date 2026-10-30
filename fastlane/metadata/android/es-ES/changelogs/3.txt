@@ -1,0 +1,1 @@
+Detección automática de bancos españoles y neobancos por IBAN y nombre con colores corporativos e insignias en cuentas.
