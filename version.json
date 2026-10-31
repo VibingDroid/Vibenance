@@ -1,6 +1,6 @@
 {
-  "version": "1.0.3",
-  "versionCode": 25,
+  "version": "1.0.3 (build 4)",
+  "versionCode": 43,
   "apkUrl": "https://github.com/VibingDroid/Vibenance/releases/download/v1.0.3/vibenance-arm64-v8a.apk",
-  "changelog": "### Nuevas características\n- **Logotipos oficiales SVG de bancos con Brandfetch:** soporte visual para más de 20 bancos y neobancos que operan en España (BBVA, Santander, CaixaBank, ING, Sabadell, Bankinter, Revolut, Openbank, N26, MyInvestor, Trade Republic, etc.) con sus logos vectoriales oficiales integrados en Cuentas, Inicio y Evolución (patrimonio y saldo).\n- **Optimización visual unificada:** integración en selectores de cuentas, desglose por entidades y tablas de resumen financiero."
+  "changelog": "### Added\n- Logotipos oficiales SVG de bancos descargados de Brandfetch e integrados en cuentas, pantalla de inicio y evolución (patrimonio y saldo)."
 }
