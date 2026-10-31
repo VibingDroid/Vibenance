@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:vibenance/generated/swagger_fireflyiii_api/firefly_iii.swagger.dart';
 import 'package:vibenance/utils/bank_detector.dart';
 
@@ -22,6 +23,7 @@ class BankLogoBadge extends StatelessWidget {
 
     Color bgColor = bank?.color ?? const Color(0xFF1E2C45);
     final String label = bank?.shortLabel ?? '';
+    final String? assetPath = bank?.assetPath;
     IconData? icon;
 
     if (label.isEmpty) {
@@ -44,6 +46,35 @@ class BankLogoBadge extends StatelessWidget {
       }
     }
 
+    Widget content;
+    if (assetPath != null) {
+      content = Semantics(
+        label: label,
+        child: Stack(
+          alignment: Alignment.center,
+          children: <Widget>[
+            Opacity(opacity: 0.0, child: Text(label)),
+            Padding(
+              padding: EdgeInsets.all(size * 0.18),
+              child: SvgPicture.asset(assetPath, fit: BoxFit.contain),
+            ),
+          ],
+        ),
+      );
+    } else if (label.isNotEmpty) {
+      content = Text(
+        label,
+        style: TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.w800,
+          fontSize: size * 0.28,
+          letterSpacing: 0.5,
+        ),
+      );
+    } else {
+      content = Icon(icon, color: Colors.white, size: size * 0.5);
+    }
+
     return Container(
       width: size,
       height: size,
@@ -59,17 +90,7 @@ class BankLogoBadge extends StatelessWidget {
         ],
       ),
       alignment: Alignment.center,
-      child: label.isNotEmpty
-          ? Text(
-              label,
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w800,
-                fontSize: size * 0.28,
-                letterSpacing: 0.5,
-              ),
-            )
-          : Icon(icon, color: Colors.white, size: size * 0.5),
+      child: content,
     );
   }
 }

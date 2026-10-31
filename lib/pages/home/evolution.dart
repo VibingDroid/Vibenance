@@ -15,6 +15,7 @@ import 'package:vibenance/generated/swagger_fireflyiii_api/firefly_iii.swagger.d
 import 'package:vibenance/pages/home/analysis_period.dart';
 import 'package:vibenance/settings.dart';
 import 'package:vibenance/theme.dart';
+import 'package:vibenance/widgets/bank_logo_badge.dart';
 import 'package:vibenance/widgets/category_icon.dart';
 import 'package:vibenance/widgets/progress_bar.dart';
 
@@ -919,6 +920,12 @@ class _HomeEvolutionState extends State<HomeEvolution>
                       children: _availableAccounts.map((AccountRead a) {
                         final bool isSel = _selectedAccountIds.contains(a.id);
                         return FilterChip(
+                          avatar: BankLogoBadge(
+                            accountName: a.attributes.name,
+                            iban: a.attributes.iban,
+                            type: a.attributes.type,
+                            size: 20,
+                          ),
                           label: Text(a.attributes.name),
                           selected: isSel,
                           onSelected: (bool sel) {
@@ -1993,6 +2000,7 @@ class _HomeEvolutionState extends State<HomeEvolution>
                 final double val = entry.value;
                 final bool isNeg = val < 0;
                 return ListTile(
+                  leading: BankLogoBadge(accountName: entry.key, size: 32),
                   title: Text(entry.key),
                   trailing: Text(
                     settings.hideAmounts

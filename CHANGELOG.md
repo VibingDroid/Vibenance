@@ -2,6 +2,11 @@
 
 Todas las novedades notables de Vibenance se documentan en este archivo.
 
+## [1.0.3] - 2026-10-31
+
+### Added
+- Logotipos oficiales SVG de bancos descargados de Brandfetch e integrados en cuentas, pantalla de inicio y evolución (patrimonio y saldo).
+
 ## [1.0.2] - 2026-10-30
 
 ### Nuevas características

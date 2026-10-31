@@ -1,6 +1,6 @@
 {
-  "version": "1.0.1 (build 2)",
-  "versionCode": 23,
-  "apkUrl": "https://github.com/VibingDroid/Vibenance/releases/download/v1.0.1/vibenance-arm64-v8a.apk",
-  "changelog": "### Correcciones\n- **Icono adaptativo con degradado:** el icono de la app en Android 8+ ahora muestra correctamente el degradado oficial de marca (`#00CED8` → `#4374F8` → `#8C38FF`) en lugar de un fondo oscuro sólido.\n- **Capturas de Play Store actualizadas:** se reemplazaron las capturas heredadas de Waterfly III por capturas reales de Vibance (Movimientos, Análisis y Evolución).\n- **Feature Graphic renovado:** nuevo banner 1024×500 con isotipo, tipografía Outfit, mockups de las pantallas reales y paleta de marca sobre fondo Material 3.\n- **Pipeline de publicación automática en Google Play:** el workflow de GitHub Actions ahora sube el `.aab` directamente a Google Play Store (canal detectado automáticamente)."
+  "version": "1.0.3",
+  "versionCode": 25,
+  "apkUrl": "https://github.com/VibingDroid/Vibenance/releases/download/v1.0.3/vibenance-arm64-v8a.apk",
+  "changelog": "### Nuevas características\n- **Logotipos oficiales SVG de bancos con Brandfetch:** soporte visual para más de 20 bancos y neobancos que operan en España (BBVA, Santander, CaixaBank, ING, Sabadell, Bankinter, Revolut, Openbank, N26, MyInvestor, Trade Republic, etc.) con sus logos vectoriales oficiales integrados en Cuentas, Inicio y Evolución (patrimonio y saldo).\n- **Optimización visual unificada:** integración en selectores de cuentas, desglose por entidades y tablas de resumen financiero."
 }

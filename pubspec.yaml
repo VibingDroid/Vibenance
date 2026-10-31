@@ -3,7 +3,7 @@ description: 'Vibenance, a personal finance mobile client for Firefly III'
 publish_to: 'none'
 
 
-version: 1.0.2+3
+version: 1.0.3+4
 
 environment:
   sdk: '>=3.10.0 <4.0.0'
@@ -84,6 +84,7 @@ flutter:
 
   assets:
     - assets/images/logo.svg
+    - assets/banks/
 
 flutter_native_splash:
   android: true

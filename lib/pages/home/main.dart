@@ -2,8 +2,6 @@ import 'dart:async';
 
 import 'package:chopper/chopper.dart' show Response;
 import 'package:collection/collection.dart';
-import 'package:community_charts_flutter/community_charts_flutter.dart'
-    as charts;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
@@ -24,7 +22,7 @@ import 'package:vibenance/pages/home/main/dashboard.dart';
 import 'package:vibenance/settings.dart';
 import 'package:vibenance/stock.dart';
 import 'package:vibenance/timezonehandler.dart';
-import 'package:vibenance/widgets/charts.dart';
+import 'package:vibenance/widgets/bank_logo_badge.dart';
 
 class HomeMain extends StatefulWidget {
   const HomeMain({super.key});
@@ -691,16 +689,9 @@ class _HomeMainState extends State<HomeMain>
                         children: <Widget>[
                           Align(
                             alignment: .center,
-                            child: Text(
-                              "⬤",
-                              style: TextStyle(
-                                color: charts.ColorUtil.toDartColor(
-                                  possibleChartColors[i %
-                                      possibleChartColors.length],
-                                ),
-                                textBaseline: .ideographic,
-                                height: 1.3,
-                              ),
+                            child: BankLogoBadge(
+                              accountName: e.label ?? '',
+                              size: 22,
                             ),
                           ),
                           Text(e.label!),

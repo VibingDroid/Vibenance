@@ -9,6 +9,7 @@ import 'package:vibenance/auth.dart';
 import 'package:vibenance/extensions.dart';
 import 'package:vibenance/generated/l10n/app_localizations.dart';
 import 'package:vibenance/generated/swagger_fireflyiii_api/firefly_iii.swagger.dart';
+import 'package:vibenance/widgets/bank_logo_badge.dart';
 import 'package:vibenance/widgets/charts.dart';
 
 class SummaryChart extends StatelessWidget {
@@ -325,16 +326,7 @@ class SummaryTable extends StatelessWidget {
                 children: <Widget>[
                   Align(
                     alignment: .center,
-                    child: Text(
-                      "⬤",
-                      style: TextStyle(
-                        color:
-                            possibleChartColorsDart[i %
-                                possibleChartColorsDart.length],
-                        textBaseline: .ideographic,
-                        height: 1.3,
-                      ),
-                    ),
+                    child: BankLogoBadge(accountName: account, size: 22),
                   ),
                   Text(account),
                   Align(

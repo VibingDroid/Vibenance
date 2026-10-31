@@ -6,11 +6,13 @@ class BankInfo {
   final String shortLabel;
   final String fullName;
   final Color color;
+  final String? assetPath;
 
   const BankInfo({
     required this.shortLabel,
     required this.fullName,
     required this.color,
+    this.assetPath,
   });
 }
 
@@ -20,78 +22,91 @@ const BankInfo _bbva = BankInfo(
   shortLabel: 'BBVA',
   fullName: 'BBVA',
   color: Color(0xFF004481),
+  assetPath: 'assets/banks/bbva.svg',
 );
 
 const BankInfo _santander = BankInfo(
   shortLabel: 'SAN',
   fullName: 'Santander',
   color: Color(0xFFEC0000),
+  assetPath: 'assets/banks/santander.svg',
 );
 
 const BankInfo _caixaBank = BankInfo(
   shortLabel: 'Caixa',
   fullName: 'CaixaBank',
   color: Color(0xFF00A9E0),
+  assetPath: 'assets/banks/caixabank.svg',
 );
 
 const BankInfo _ing = BankInfo(
   shortLabel: 'ING',
   fullName: 'ING',
   color: Color(0xFFFF6200),
+  assetPath: 'assets/banks/ing.svg',
 );
 
 const BankInfo _sabadell = BankInfo(
   shortLabel: 'SAB',
   fullName: 'Banco Sabadell',
   color: Color(0xFF007BC7),
+  assetPath: 'assets/banks/sabadell.svg',
 );
 
 const BankInfo _bankinter = BankInfo(
   shortLabel: 'BKT',
   fullName: 'Bankinter',
   color: Color(0xFFFF6600),
+  assetPath: 'assets/banks/bankinter.svg',
 );
 
 const BankInfo _abanca = BankInfo(
   shortLabel: 'Abanca',
   fullName: 'Abanca',
   color: Color(0xFF0066B3),
+  assetPath: 'assets/banks/abanca.svg',
 );
 
 const BankInfo _ibercaja = BankInfo(
   shortLabel: 'Iber',
   fullName: 'Ibercaja',
   color: Color(0xFFE4002B),
+  assetPath: 'assets/banks/ibercaja.svg',
 );
 
 const BankInfo _kutxabank = BankInfo(
   shortLabel: 'Kutxa',
   fullName: 'Kutxabank',
   color: Color(0xFF003865),
+  assetPath: 'assets/banks/kutxabank.svg',
 );
 
 const BankInfo _unicaja = BankInfo(
   shortLabel: 'Uni',
   fullName: 'Unicaja Banco',
   color: Color(0xFF00833E),
+  assetPath: 'assets/banks/unicaja.svg',
 );
 
 const BankInfo _cajamar = BankInfo(
   shortLabel: 'CajaR',
   fullName: 'Cajamar Caja Rural',
   color: Color(0xFF009639),
+  assetPath: 'assets/banks/cajamar.svg',
 );
 
 const BankInfo _laboralKutxa = BankInfo(
   shortLabel: 'LabK',
   fullName: 'Laboral Kutxa',
   color: Color(0xFF00843D),
+  assetPath: 'assets/banks/laboralkutxa.svg',
 );
 
 const BankInfo _evoBanco = BankInfo(
   shortLabel: 'EVO',
   fullName: 'EVO Banco',
   color: Color(0xFFFF5500),
+  assetPath: 'assets/banks/evobanco.svg',
 );
 
 const BankInfo _mediolanum = BankInfo(
@@ -104,6 +119,7 @@ const BankInfo _openbank = BankInfo(
   shortLabel: 'Open',
   fullName: 'Openbank',
   color: Color(0xFF1E1E1E),
+  assetPath: 'assets/banks/openbank.svg',
 );
 
 const BankInfo _triodos = BankInfo(
@@ -116,6 +132,7 @@ const BankInfo _deutscheBank = BankInfo(
   shortLabel: 'DB',
   fullName: 'Deutsche Bank',
   color: Color(0xFF0018A8),
+  assetPath: 'assets/banks/deutschebank.svg',
 );
 
 // --- Neobanks / fintechs operating in Spain ---
@@ -124,24 +141,28 @@ const BankInfo _n26 = BankInfo(
   shortLabel: 'N26',
   fullName: 'N26',
   color: Color(0xFF36A18B),
+  assetPath: 'assets/banks/n26.svg',
 );
 
 const BankInfo _revolut = BankInfo(
   shortLabel: 'R',
   fullName: 'Revolut',
   color: Color(0xFF191C1F),
+  assetPath: 'assets/banks/revolut.svg',
 );
 
 const BankInfo _wise = BankInfo(
   shortLabel: 'Wise',
   fullName: 'Wise',
   color: Color(0xFF2ED06E),
+  assetPath: 'assets/banks/wise.svg',
 );
 
 const BankInfo _paypal = BankInfo(
   shortLabel: 'PP',
   fullName: 'PayPal',
   color: Color(0xFF003087),
+  assetPath: 'assets/banks/paypal.svg',
 );
 
 const BankInfo _bnext = BankInfo(
@@ -154,12 +175,14 @@ const BankInfo _myinvestor = BankInfo(
   shortLabel: 'MyInv',
   fullName: 'MyInvestor',
   color: Color(0xFFFF6A13),
+  assetPath: 'assets/banks/myinvestor.svg',
 );
 
 const BankInfo _tradeRepublic = BankInfo(
   shortLabel: 'TR',
   fullName: 'Trade Republic',
   color: Color(0xFF00D47B),
+  assetPath: 'assets/banks/traderepublic.svg',
 );
 
 // Spanish bank entity codes (4 digits after ES + 2 check digits).
