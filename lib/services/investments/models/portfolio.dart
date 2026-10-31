@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 class Holding {
   Holding({
     required this.isin,
@@ -33,7 +31,9 @@ class Holding {
       ticker: ticker ?? this.ticker,
       name: name ?? this.name,
       category: category ?? this.category,
-      shares: shares != null ? double.parse(shares.toStringAsFixed(6)) : this.shares,
+      shares: shares != null
+          ? double.parse(shares.toStringAsFixed(6))
+          : this.shares,
       investedAmount: investedAmount ?? this.investedAmount,
     );
   }
@@ -73,9 +73,9 @@ class Portfolio {
     DateTime? updatedAt,
     List<String>? processedTransactionIds,
     List<Holding>? holdings,
-  })  : updatedAt = updatedAt ?? DateTime.now().toUtc(),
-        processedTransactionIds = processedTransactionIds ?? <String>[],
-        holdings = holdings ?? <Holding>[];
+  }) : updatedAt = updatedAt ?? DateTime.now().toUtc(),
+       processedTransactionIds = processedTransactionIds ?? <String>[],
+       holdings = holdings ?? <Holding>[];
 
   final int version;
   final String broker;
@@ -83,8 +83,10 @@ class Portfolio {
   final List<String> processedTransactionIds;
   final List<Holding> holdings;
 
-  double get totalInvestedAmount =>
-      holdings.fold<double>(0.0, (double sum, Holding h) => sum + h.investedAmount);
+  double get totalInvestedAmount => holdings.fold<double>(
+    0.0,
+    (double sum, Holding h) => sum + h.investedAmount,
+  );
 
   Holding? findHolding({String? isin, String? ticker, String? name}) {
     final String cleanIsin = isin?.trim().toUpperCase() ?? '';
@@ -95,7 +97,8 @@ class Portfolio {
       if (cleanIsin.isNotEmpty && h.isin.trim().toUpperCase() == cleanIsin) {
         return h;
       }
-      if (cleanTicker.isNotEmpty && h.ticker.trim().toUpperCase() == cleanTicker) {
+      if (cleanTicker.isNotEmpty &&
+          h.ticker.trim().toUpperCase() == cleanTicker) {
         return h;
       }
       if (cleanName.isNotEmpty && h.name.trim().toLowerCase() == cleanName) {
@@ -120,7 +123,8 @@ class Portfolio {
       broker: broker ?? this.broker,
       updatedAt: updatedAt ?? this.updatedAt,
       processedTransactionIds:
-          processedTransactionIds ?? List<String>.from(this.processedTransactionIds),
+          processedTransactionIds ??
+          List<String>.from(this.processedTransactionIds),
       holdings: holdings ?? List<Holding>.from(this.holdings),
     );
   }
@@ -134,10 +138,14 @@ class Portfolio {
     } catch (_) {
       updated = DateTime.now().toUtc();
     }
-    final List<dynamic> txIdsRaw = json['processed_transaction_ids'] as List<dynamic>? ?? <dynamic>[];
-    final List<String> txIds = txIdsRaw.map((dynamic e) => e.toString().trim()).toList();
+    final List<dynamic> txIdsRaw =
+        json['processed_transaction_ids'] as List<dynamic>? ?? <dynamic>[];
+    final List<String> txIds = txIdsRaw
+        .map((dynamic e) => e.toString().trim())
+        .toList();
 
-    final List<dynamic> holdingsRaw = json['holdings'] as List<dynamic>? ?? <dynamic>[];
+    final List<dynamic> holdingsRaw =
+        json['holdings'] as List<dynamic>? ?? <dynamic>[];
     final List<Holding> hList = holdingsRaw
         .whereType<Map<String, dynamic>>()
         .map(Holding.fromJson)

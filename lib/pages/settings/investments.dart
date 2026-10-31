@@ -1,7 +1,7 @@
+import 'package:chopper/chopper.dart' show Response;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:vibenance/auth.dart';
-import 'package:vibenance/generated/swagger_fireflyiii_api/firefly_iii.models.swagger.dart';
 import 'package:vibenance/generated/swagger_fireflyiii_api/firefly_iii.swagger.dart';
 import 'package:vibenance/settings.dart';
 
@@ -25,14 +25,16 @@ class _InvestmentsSettingsSectionState
   }
 
   Future<void> _loadAssetAccounts() async {
-    final FireflyService firefly =
-        Provider.of<FireflyService>(context, listen: false);
-    if (!firefly.hasApi()) return;
+    final FireflyService firefly = Provider.of<FireflyService>(
+      context,
+      listen: false,
+    );
+    if (!firefly.hasApi) return;
 
     setState(() => _isLoadingAccounts = true);
     try {
-      final res = await firefly.api.v1AccountsGet(
-        type: enums.AccountTypeFilter.assetAccount,
+      final Response<AccountArray> res = await firefly.api.v1AccountsGet(
+        type: AccountTypeFilter.assetAccount,
         limit: 100,
       );
       if (res.isSuccessful && res.body != null) {
@@ -50,8 +52,7 @@ class _InvestmentsSettingsSectionState
   }
 
   @override
-  Widget build(BuildContext context)
-  {
+  Widget build(BuildContext context) {
     final SettingsProvider settings = Provider.of<SettingsProvider>(context);
     final ThemeData theme = Theme.of(context);
 
@@ -106,9 +107,10 @@ class _InvestmentsSettingsSectionState
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
               child: DropdownButtonFormField<String>(
-                value: _assetAccounts.any(
-                  (AccountRead a) => a.id == settings.investmentsAccountId,
-                )
+                initialValue:
+                    _assetAccounts.any(
+                      (AccountRead a) => a.id == settings.investmentsAccountId,
+                    )
                     ? settings.investmentsAccountId
                     : null,
                 decoration: InputDecoration(

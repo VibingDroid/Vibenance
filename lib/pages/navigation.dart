@@ -10,6 +10,7 @@ import 'package:vibenance/pages/accounts.dart';
 import 'package:vibenance/pages/ai_categorizer.dart';
 import 'package:vibenance/pages/categories.dart';
 import 'package:vibenance/pages/home.dart';
+import 'package:vibenance/pages/investments/investments_screen.dart';
 import 'package:vibenance/pages/piggybanks.dart';
 import 'package:vibenance/pages/settings.dart';
 import 'package:vibenance/pages/settings/importer.dart';
@@ -133,6 +134,13 @@ class NavPageState extends State<NavPage> with TickerProviderStateMixin {
           AICategorizerPage(),
           Icon(Icons.auto_awesome_outlined),
           Icon(Icons.auto_awesome),
+        ),
+      if (context.watch<SettingsProvider>().investmentsEnabled)
+        const NavDestination(
+          "Inversiones",
+          InvestmentsScreen(),
+          Icon(Icons.trending_up_outlined),
+          Icon(Icons.trending_up),
         ),
       const NavDestination(
         "Importación bancaria",

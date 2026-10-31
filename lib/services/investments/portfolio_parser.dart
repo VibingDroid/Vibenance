@@ -53,7 +53,10 @@ class PortfolioNotesParser {
 
   /// Inserta o reemplaza el bloque de cartera en las notas,
   /// preservando exactamente todo el texto fuera de las etiquetas.
-  static String updateNotesWithPortfolio(String? currentNotes, Portfolio portfolio) {
+  static String updateNotesWithPortfolio(
+    String? currentNotes,
+    Portfolio portfolio,
+  ) {
     const JsonEncoder encoder = JsonEncoder.withIndent('  ');
     final String portfolioJson = encoder.convert(portfolio.toJson());
     final String block = '$startTag\n$portfolioJson\n$endTag';

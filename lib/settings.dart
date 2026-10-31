@@ -235,7 +235,7 @@ class SettingsProvider with ChangeNotifier {
   static const String settingAICategorizerEnabled = "AI_CATEGORIZER_ENABLED";
   static const String settingAICategorizerUrl = "AI_CATEGORIZER_URL";
   static const String settingAICategorizerKey = "AI_CATEGORIZER_KEY";
-  static const String settingInvestmentsEnabled = "INVESTMENTS_ENABLED";
+  static const String settingInvestmentsEnabled = "enable_investments_module";
   static const String settingInvestmentsAccountId = "INVESTMENTS_ACCOUNT_ID";
 
   bool get debug => _boolSettings[.debug];
@@ -545,7 +545,9 @@ class SettingsProvider with ChangeNotifier {
         "http://127.0.0.1:3000";
     _aiCategorizerKey = await prefs.getString(settingAICategorizerKey);
     _investmentsEnabled =
-        await prefs.getBool(settingInvestmentsEnabled) ?? false;
+        await prefs.getBool(settingInvestmentsEnabled) ??
+        await prefs.getBool("INVESTMENTS_ENABLED") ??
+        false;
     _investmentsAccountId = await prefs.getString(settingInvestmentsAccountId);
 
     _loaded = _loading = true;
@@ -965,10 +967,7 @@ class SettingsProvider with ChangeNotifier {
     }
 
     _investmentsEnabled = enabled;
-    await SharedPreferencesAsync().setBool(
-      settingInvestmentsEnabled,
-      enabled,
-    );
+    await SharedPreferencesAsync().setBool(settingInvestmentsEnabled, enabled);
 
     log.finest(() => "notify SettingsProvider->setInvestmentsEnabled()");
     notifyListeners();

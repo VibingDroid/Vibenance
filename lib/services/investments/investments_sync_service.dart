@@ -1,8 +1,6 @@
-import 'dart:convert';
-import 'package:chopper/chopper.dart';
+import 'package:chopper/chopper.dart' show Response;
 import 'package:logging/logging.dart';
 import 'package:vibenance/auth.dart';
-import 'package:vibenance/generated/swagger_fireflyiii_api/firefly_iii.models.swagger.dart';
 import 'package:vibenance/generated/swagger_fireflyiii_api/firefly_iii.swagger.dart';
 import 'package:vibenance/services/investments/models/portfolio.dart';
 import 'package:vibenance/services/investments/portfolio_parser.dart';
@@ -40,7 +38,9 @@ class InvestmentsSyncService {
   Future<AccountRead?> getAccount(String accountId) async {
     final FireflyIii api = fireflyService.api;
     try {
-      final Response<AccountSingle> res = await api.v1AccountsIdGet(id: accountId);
+      final Response<AccountSingle> res = await api.v1AccountsIdGet(
+        id: accountId,
+      );
       if (res.isSuccessful && res.body != null) {
         return res.body!.data;
       }
@@ -61,7 +61,10 @@ class InvestmentsSyncService {
   }
 
   /// Guarda el portafolio actualizado en las notas de la cuenta preservando notas previas
-  Future<bool> savePortfolio(String accountId, Portfolio updatedPortfolio) async {
+  Future<bool> savePortfolio(
+    String accountId,
+    Portfolio updatedPortfolio,
+  ) async {
     final AccountRead? account = await getAccount(accountId);
     if (account == null) {
       return false;
@@ -101,13 +104,15 @@ class InvestmentsSyncService {
     );
 
     try {
-      final Response<AccountSingle> putRes = await fireflyService.api.v1AccountsIdPut(
-        id: accountId,
-        body: updateBody,
-      );
+      final Response<AccountSingle> putRes = await fireflyService.api
+          .v1AccountsIdPut(id: accountId, body: updateBody);
       return putRes.isSuccessful;
     } catch (e, stack) {
-      log.severe('Error updating account $accountId with portfolio notes: $e', e, stack);
+      log.severe(
+        'Error updating account $accountId with portfolio notes: $e',
+        e,
+        stack,
+      );
       return false;
     }
   }
@@ -120,11 +125,8 @@ class InvestmentsSyncService {
     final List<SyncCandidate> candidates = <SyncCandidate>[];
 
     try {
-      final Response<TransactionArray> res =
-          await fireflyService.api.v1AccountsIdTransactionsGet(
-        id: accountId,
-        limit: 100,
-      );
+      final Response<TransactionArray> res = await fireflyService.api
+          .v1AccountsIdTransactionsGet(id: accountId, limit: 100);
 
       if (!res.isSuccessful || res.body == null) {
         return candidates;
@@ -147,8 +149,12 @@ class InvestmentsSyncService {
           final String notes = split.notes ?? '';
           final String combinedText = '$description $notes';
 
-          final String? detectedIsin = PortfolioNotesParser.extractIsin(combinedText);
-          final double? explicitShares = PortfolioNotesParser.extractShares(combinedText);
+          final String? detectedIsin = PortfolioNotesParser.extractIsin(
+            combinedText,
+          );
+          final double? explicitShares = PortfolioNotesParser.extractShares(
+            combinedText,
+          );
 
           // Intentar asociar con un holding existente por ISIN, Ticker o Nombre
           final Holding? matchedHolding = portfolio.findHolding(
@@ -157,7 +163,8 @@ class InvestmentsSyncService {
           );
 
           // Si tiene ISIN detectado o coincide con un holding existente
-          final bool isRelevant = detectedIsin != null || matchedHolding != null;
+          final bool isRelevant =
+              detectedIsin != null || matchedHolding != null;
           if (isRelevant) {
             final String journalId = split.transactionJournalId ?? txId;
             candidates.add(
@@ -187,12 +194,37 @@ class InvestmentsSyncService {
   /// Aplica una lista de compras confirmadas al portfolio de la cuenta
   static Portfolio applyConfirmedPurchases({
     required Portfolio currentPortfolio,
-    required List<({SyncCandidate candidate, String isin, String ticker, String name, double shares, double amount, String? category})> purchases,
+    required List<
+      ({
+        SyncCandidate candidate,
+        String isin,
+        String ticker,
+        String name,
+        double shares,
+        double amount,
+        String? category,
+      })
+    >
+    purchases,
   }) {
-    final List<Holding> updatedHoldings = List<Holding>.from(currentPortfolio.holdings);
-    final Set<String> updatedTxIds = Set<String>.from(currentPortfolio.processedTransactionIds);
+    final List<Holding> updatedHoldings = List<Holding>.from(
+      currentPortfolio.holdings,
+    );
+    final Set<String> updatedTxIds = Set<String>.from(
+      currentPortfolio.processedTransactionIds,
+    );
 
-    for (final purchase in purchases) {
+    for (final ({
+          double amount,
+          SyncCandidate candidate,
+          String? category,
+          String isin,
+          String name,
+          double shares,
+          String ticker,
+        })
+        purchase
+        in purchases) {
       final String isin = purchase.isin.trim().toUpperCase();
       final String ticker = purchase.ticker.trim().toUpperCase();
       final String name = purchase.name.trim();

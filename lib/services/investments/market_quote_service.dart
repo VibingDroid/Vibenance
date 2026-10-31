@@ -29,7 +29,7 @@ class MarketQuote {
 
 class MarketQuoteService {
   MarketQuoteService({http.Client? httpClient})
-      : _client = httpClient ?? http.Client();
+    : _client = httpClient ?? http.Client();
 
   final http.Client _client;
 
@@ -60,7 +60,9 @@ class MarketQuoteService {
     try {
       final http.Response res = await _client.get(uri, headers: _headers);
       if (res.statusCode != 200) {
-        log.warning('Yahoo search failed for ISIN $cleanIsin (status ${res.statusCode})');
+        log.warning(
+          'Yahoo search failed for ISIN $cleanIsin (status ${res.statusCode})',
+        );
         return null;
       }
 
@@ -86,9 +88,13 @@ class MarketQuoteService {
           score = 100; // XETRA preferente
         } else if (upperSym.endsWith('.F')) {
           score = 90; // Frankfurt
-        } else if (exch.contains('GER') || exch.contains('FRA') || exch.contains('XETRA')) {
+        } else if (exch.contains('GER') ||
+            exch.contains('FRA') ||
+            exch.contains('XETRA')) {
           score = 80;
-        } else if (upperSym.endsWith('.PA') || upperSym.endsWith('.AS') || upperSym.endsWith('.MC')) {
+        } else if (upperSym.endsWith('.PA') ||
+            upperSym.endsWith('.AS') ||
+            upperSym.endsWith('.MC')) {
           score = 60; // Euronext / Madrid
         } else if (upperSym.endsWith('.L')) {
           score = 40; // LSE
@@ -109,13 +115,17 @@ class MarketQuoteService {
 
   /// Obtiene la cotización en tiempo real para un ticker,
   /// utilizando caché en memoria de 5 minutos a menos que forceRefresh sea true.
-  Future<MarketQuote?> fetchQuote(String ticker, {bool forceRefresh = false}) async {
+  Future<MarketQuote?> fetchQuote(
+    String ticker, {
+    bool forceRefresh = false,
+  }) async {
     final String cleanTicker = ticker.trim().toUpperCase();
     if (cleanTicker.isEmpty) return null;
 
     final DateTime now = DateTime.now();
     if (!forceRefresh && _cache.containsKey(cleanTicker)) {
-      final ({MarketQuote quote, DateTime cachedAt}) entry = _cache[cleanTicker]!;
+      final ({MarketQuote quote, DateTime cachedAt}) entry =
+          _cache[cleanTicker]!;
       if (now.difference(entry.cachedAt) < cacheTtl) {
         return entry.quote;
       }
@@ -128,24 +138,29 @@ class MarketQuoteService {
     try {
       final http.Response res = await _client.get(uri, headers: _headers);
       if (res.statusCode != 200) {
-        log.warning('Yahoo quote fetch failed for $cleanTicker (status ${res.statusCode})');
+        log.warning(
+          'Yahoo quote fetch failed for $cleanTicker (status ${res.statusCode})',
+        );
         return null;
       }
 
       final dynamic data = jsonDecode(res.body);
       if (data is! Map<String, dynamic>) return null;
 
-      final Map<String, dynamic>? chart = data['chart'] as Map<String, dynamic>?;
+      final Map<String, dynamic>? chart =
+          data['chart'] as Map<String, dynamic>?;
       final List<dynamic>? results = chart?['result'] as List<dynamic>?;
       if (results == null || results.isEmpty) return null;
 
-      final Map<String, dynamic>? meta = results[0]['meta'] as Map<String, dynamic>?;
+      final Map<String, dynamic>? meta =
+          results[0]['meta'] as Map<String, dynamic>?;
       if (meta == null) return null;
 
       final num? rawPrice = meta['regularMarketPrice'] as num?;
       final num? rawPrevClose = meta['chartPreviousClose'] as num? ?? rawPrice;
       final String currency = meta['currency'] as String? ?? 'EUR';
-      final String? name = meta['longName'] as String? ?? meta['shortName'] as String?;
+      final String? name =
+          meta['longName'] as String? ?? meta['shortName'] as String?;
 
       if (rawPrice == null) return null;
 
@@ -168,9 +183,9 @@ class MarketQuoteService {
 
   /// Obtiene cotizaciones en lote para una lista de tickers
   Future<Map<String, MarketQuote>> fetchQuotes(
-    List<String> tickers,
-    {bool forceRefresh = false},
-  ) async {
+    List<String> tickers, {
+    bool forceRefresh = false,
+  }) async {
     final Map<String, MarketQuote> results = <String, MarketQuote>{};
     for (final String t in tickers) {
       final MarketQuote? q = await fetchQuote(t, forceRefresh: forceRefresh);
@@ -182,7 +197,10 @@ class MarketQuoteService {
   }
 
   /// Consulta el precio de cierre de un día concreto (necesario para estimar participaciones en compras importadas)
-  Future<double?> fetchHistoricalClosePrice(String ticker, DateTime date) async {
+  Future<double?> fetchHistoricalClosePrice(
+    String ticker,
+    DateTime date,
+  ) async {
     final String cleanTicker = ticker.trim().toUpperCase();
     if (cleanTicker.isEmpty) return null;
 
@@ -200,23 +218,29 @@ class MarketQuoteService {
     try {
       final http.Response res = await _client.get(uri, headers: _headers);
       if (res.statusCode != 200) {
-        log.warning('Historical quote failed for $cleanTicker at $date (${res.statusCode})');
+        log.warning(
+          'Historical quote failed for $cleanTicker at $date (${res.statusCode})',
+        );
         return null;
       }
 
       final dynamic data = jsonDecode(res.body);
       if (data is! Map<String, dynamic>) return null;
 
-      final Map<String, dynamic>? chart = data['chart'] as Map<String, dynamic>?;
+      final Map<String, dynamic>? chart =
+          data['chart'] as Map<String, dynamic>?;
       final List<dynamic>? results = chart?['result'] as List<dynamic>?;
       if (results == null || results.isEmpty) return null;
 
-      final Map<String, dynamic> firstResult = results[0] as Map<String, dynamic>;
-      final Map<String, dynamic>? indicators = firstResult['indicators'] as Map<String, dynamic>?;
+      final Map<String, dynamic> firstResult =
+          results[0] as Map<String, dynamic>;
+      final Map<String, dynamic>? indicators =
+          firstResult['indicators'] as Map<String, dynamic>?;
       final List<dynamic>? quoteList = indicators?['quote'] as List<dynamic>?;
 
       if (quoteList != null && quoteList.isNotEmpty) {
-        final Map<String, dynamic> quoteData = quoteList[0] as Map<String, dynamic>;
+        final Map<String, dynamic> quoteData =
+            quoteList[0] as Map<String, dynamic>;
         final List<dynamic>? closeValues = quoteData['close'] as List<dynamic>?;
         if (closeValues != null && closeValues.isNotEmpty) {
           // Selecciona el último valor de cierre válido dentro del rango
@@ -230,11 +254,18 @@ class MarketQuoteService {
       }
 
       // Fallback a chartPreviousClose o regularMarketPrice si vino en meta
-      final Map<String, dynamic>? meta = firstResult['meta'] as Map<String, dynamic>?;
-      final num? fallback = meta?['chartPreviousClose'] as num? ?? meta?['regularMarketPrice'] as num?;
+      final Map<String, dynamic>? meta =
+          firstResult['meta'] as Map<String, dynamic>?;
+      final num? fallback =
+          meta?['chartPreviousClose'] as num? ??
+          meta?['regularMarketPrice'] as num?;
       return fallback?.toDouble();
     } catch (e, stack) {
-      log.warning('Error fetching historical close price for $cleanTicker: $e', e, stack);
+      log.warning(
+        'Error fetching historical close price for $cleanTicker: $e',
+        e,
+        stack,
+      );
       return null;
     }
   }

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:vibenance/auth.dart';
 import 'package:vibenance/generated/swagger_fireflyiii_api/firefly_iii.models.swagger.dart';
-import 'package:vibenance/pages/navigation.dart';
 import 'package:vibenance/services/investments/investments_sync_service.dart';
 import 'package:vibenance/services/investments/market_quote_service.dart';
 import 'package:vibenance/services/investments/models/portfolio.dart';
@@ -37,10 +36,14 @@ class _InvestmentsScreenState extends State<InvestmentsScreen> {
   }
 
   Future<void> _loadData({bool refreshQuotes = false}) async {
-    final SettingsProvider settings =
-        Provider.of<SettingsProvider>(context, listen: false);
-    final FireflyService firefly =
-        Provider.of<FireflyService>(context, listen: false);
+    final SettingsProvider settings = Provider.of<SettingsProvider>(
+      context,
+      listen: false,
+    );
+    final FireflyService firefly = Provider.of<FireflyService>(
+      context,
+      listen: false,
+    );
 
     final String? accountId = settings.investmentsAccountId;
     if (accountId == null || accountId.isEmpty) {
@@ -93,10 +96,8 @@ class _InvestmentsScreenState extends State<InvestmentsScreen> {
           .toList();
 
       if (tickers.isNotEmpty) {
-        final Map<String, MarketQuote> newQuotes = await _quoteService.fetchQuotes(
-          tickers,
-          forceRefresh: true,
-        );
+        final Map<String, MarketQuote> newQuotes = await _quoteService
+            .fetchQuotes(tickers, forceRefresh: true);
         if (mounted) {
           setState(() => _quotes = newQuotes);
         }
@@ -110,15 +111,17 @@ class _InvestmentsScreenState extends State<InvestmentsScreen> {
 
   Future<void> _checkPendingPurchases() async {
     if (_syncService == null) return;
-    final SettingsProvider settings =
-        Provider.of<SettingsProvider>(context, listen: false);
+    final SettingsProvider settings = Provider.of<SettingsProvider>(
+      context,
+      listen: false,
+    );
     final String? accountId = settings.investmentsAccountId;
     if (accountId == null) return;
 
     setState(() => _isCheckingPendingPurchases = true);
     try {
-      final List<SyncCandidate> candidates =
-          await _syncService!.findUnprocessedPurchases(accountId, _portfolio);
+      final List<SyncCandidate> candidates = await _syncService!
+          .findUnprocessedPurchases(accountId, _portfolio);
       if (mounted) {
         setState(() => _pendingCandidates = candidates);
       }
@@ -143,8 +146,9 @@ class _InvestmentsScreenState extends State<InvestmentsScreen> {
 
   double get _totalProfitLoss => _totalMarketValue - _totalInvestedAmount;
 
-  double get _totalProfitLossPercent =>
-      _totalInvestedAmount > 0 ? (_totalProfitLoss / _totalInvestedAmount) * 100 : 0.0;
+  double get _totalProfitLossPercent => _totalInvestedAmount > 0
+      ? (_totalProfitLoss / _totalInvestedAmount) * 100
+      : 0.0;
 
   double get _todayChange {
     double change = 0.0;
@@ -165,7 +169,21 @@ class _InvestmentsScreenState extends State<InvestmentsScreen> {
     if (!settings.investmentsEnabled) {
       return Scaffold(
         appBar: AppBar(title: const Text('Inversiones')),
-        drawer: const NavigationDrawerWidget(),
+        drawer: Drawer(
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: const <Widget>[
+              DrawerHeader(
+                child: Center(
+                  child: Text(
+                    'Vibenance',
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
         body: const Center(
           child: Text('El módulo de inversiones está desactivado.'),
         ),
@@ -176,14 +194,32 @@ class _InvestmentsScreenState extends State<InvestmentsScreen> {
         settings.investmentsAccountId!.isEmpty) {
       return Scaffold(
         appBar: AppBar(title: const Text('Inversiones')),
-        drawer: const NavigationDrawerWidget(),
+        drawer: Drawer(
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: const <Widget>[
+              DrawerHeader(
+                child: Center(
+                  child: Text(
+                    'Vibenance',
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
         body: Center(
           child: Padding(
             padding: const EdgeInsets.all(24),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                Icon(Icons.account_balance, size: 64, color: theme.colorScheme.primary),
+                Icon(
+                  Icons.account_balance,
+                  size: 64,
+                  color: theme.colorScheme.primary,
+                ),
                 const SizedBox(height: 16),
                 Text(
                   'Selecciona tu cuenta de inversión',
@@ -224,7 +260,21 @@ class _InvestmentsScreenState extends State<InvestmentsScreen> {
             ),
         ],
       ),
-      drawer: const NavigationDrawerWidget(),
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: const <Widget>[
+            DrawerHeader(
+              child: Center(
+                child: Text(
+                  'Vibenance',
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _showAddHoldingDialog,
         icon: const Icon(Icons.add),
@@ -266,7 +316,9 @@ class _InvestmentsScreenState extends State<InvestmentsScreen> {
           children: <Widget>[
             Text(
               'Valor de Mercado Actual',
-              style: theme.textTheme.bodyMedium?.copyWith(color: theme.hintColor),
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.hintColor,
+              ),
             ),
             const SizedBox(height: 4),
             Text(
@@ -286,7 +338,9 @@ class _InvestmentsScreenState extends State<InvestmentsScreen> {
                   children: <Widget>[
                     Text(
                       'Capital Aportado',
-                      style: theme.textTheme.bodySmall?.copyWith(color: theme.hintColor),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.hintColor,
+                      ),
                     ),
                     const SizedBox(height: 2),
                     Text(
@@ -303,7 +357,9 @@ class _InvestmentsScreenState extends State<InvestmentsScreen> {
                                 ? Icons.check_circle_outline
                                 : Icons.info_outline,
                             size: 14,
-                            color: matchesFireflyBalance ? Colors.green : Colors.orange,
+                            color: matchesFireflyBalance
+                                ? Colors.green
+                                : Colors.orange,
                           ),
                           const SizedBox(width: 4),
                           Text(
@@ -311,7 +367,9 @@ class _InvestmentsScreenState extends State<InvestmentsScreen> {
                                 ? 'Cuadra con saldo Firefly'
                                 : 'Saldo Firefly: ${currentAccBalance.toStringAsFixed(2)} €',
                             style: theme.textTheme.labelSmall?.copyWith(
-                              color: matchesFireflyBalance ? Colors.green : Colors.orange,
+                              color: matchesFireflyBalance
+                                  ? Colors.green
+                                  : Colors.orange,
                             ),
                           ),
                         ],
@@ -323,7 +381,9 @@ class _InvestmentsScreenState extends State<InvestmentsScreen> {
                   children: <Widget>[
                     Text(
                       'Rentabilidad Total',
-                      style: theme.textTheme.bodySmall?.copyWith(color: theme.hintColor),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.hintColor,
+                      ),
                     ),
                     const SizedBox(height: 2),
                     Text(
@@ -365,11 +425,17 @@ class _InvestmentsScreenState extends State<InvestmentsScreen> {
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              icon: Badge(
-                isLabelVisible: pendingCount > 0,
-                label: Text('$pendingCount'),
-                child: const Icon(Icons.sync),
-              ),
+              icon: _isCheckingPendingPurchases
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : Badge(
+                      isLabelVisible: pendingCount > 0,
+                      label: Text('$pendingCount'),
+                      child: const Icon(Icons.sync),
+                    ),
               label: Text(
                 pendingCount > 0
                     ? 'Sincronizar compras ($pendingCount pendientes)'
@@ -394,7 +460,9 @@ class _InvestmentsScreenState extends State<InvestmentsScreen> {
               const SizedBox(height: 12),
               Text(
                 'No hay posiciones en la cartera',
-                style: theme.textTheme.bodyMedium?.copyWith(color: theme.hintColor),
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.hintColor,
+                ),
               ),
               const SizedBox(height: 8),
               const Text(
@@ -426,7 +494,8 @@ class _InvestmentsScreenState extends State<InvestmentsScreen> {
 
   Widget _buildHoldingCard(Holding holding, ThemeData theme) {
     final MarketQuote? quote = _quotes[holding.ticker.toUpperCase()];
-    final double currentPrice = quote?.regularMarketPrice ?? holding.averageBuyPrice;
+    final double currentPrice =
+        quote?.regularMarketPrice ?? holding.averageBuyPrice;
     final double totalValue = holding.shares * currentPrice;
     final double pnl = totalValue - holding.investedAmount;
     final double pnlPercent = holding.investedAmount > 0
@@ -473,7 +542,9 @@ class _InvestmentsScreenState extends State<InvestmentsScreen> {
                 children: <Widget>[
                   Text(
                     '${holding.ticker} • ${holding.isin}',
-                    style: theme.textTheme.labelSmall?.copyWith(color: theme.hintColor),
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: theme.hintColor,
+                    ),
                   ),
                   Text(
                     '${isPositive ? '+' : ''}${pnl.toStringAsFixed(2)} € (${pnlPercent.toStringAsFixed(2)}%)',
@@ -535,19 +606,21 @@ class _InvestmentsScreenState extends State<InvestmentsScreen> {
                               ? const SizedBox(
                                   width: 16,
                                   height: 16,
-                                  child: CircularProgressIndicator(strokeWidth: 2),
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
                                 )
                               : const Icon(Icons.search),
                           onPressed: () async {
                             final String isin = isinCtrl.text.trim();
                             if (isin.isNotEmpty) {
                               setStateDialog(() => resolving = true);
-                              final String? t =
-                                  await _quoteService.resolveIsinToTicker(isin);
+                              final String? t = await _quoteService
+                                  .resolveIsinToTicker(isin);
                               if (t != null) {
                                 tickerCtrl.text = t;
-                                final MarketQuote? q =
-                                    await _quoteService.fetchQuote(t);
+                                final MarketQuote? q = await _quoteService
+                                    .fetchQuote(t);
                                 if (q != null && q.longName != null) {
                                   nameCtrl.text = q.longName!;
                                 }
@@ -560,22 +633,30 @@ class _InvestmentsScreenState extends State<InvestmentsScreen> {
                     ),
                     TextField(
                       controller: tickerCtrl,
-                      decoration: const InputDecoration(labelText: 'Ticker (ej. EUNL.DE)'),
+                      decoration: const InputDecoration(
+                        labelText: 'Ticker (ej. EUNL.DE)',
+                      ),
                     ),
                     TextField(
                       controller: nameCtrl,
-                      decoration: const InputDecoration(labelText: 'Nombre activo'),
+                      decoration: const InputDecoration(
+                        labelText: 'Nombre activo',
+                      ),
                     ),
                     TextField(
                       controller: sharesCtrl,
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
                       decoration: const InputDecoration(
                         labelText: 'Participaciones (hasta 6 decimales)',
                       ),
                     ),
                     TextField(
                       controller: investedCtrl,
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
                       decoration: const InputDecoration(
                         labelText: 'Capital aportado total (€)',
                       ),
@@ -597,9 +678,13 @@ class _InvestmentsScreenState extends State<InvestmentsScreen> {
                 ElevatedButton(
                   onPressed: () async {
                     final double shares =
-                        double.tryParse(sharesCtrl.text.replaceAll(',', '.')) ?? 0.0;
+                        double.tryParse(sharesCtrl.text.replaceAll(',', '.')) ??
+                        0.0;
                     final double invested =
-                        double.tryParse(investedCtrl.text.replaceAll(',', '.')) ?? 0.0;
+                        double.tryParse(
+                          investedCtrl.text.replaceAll(',', '.'),
+                        ) ??
+                        0.0;
 
                     if (shares <= 0 || tickerCtrl.text.trim().isEmpty) {
                       return;
@@ -618,10 +703,12 @@ class _InvestmentsScreenState extends State<InvestmentsScreen> {
                       investedAmount: invested,
                     );
 
-                    final List<Holding> hList = List<Holding>.from(_portfolio.holdings)
-                      ..add(newH);
-                    final Portfolio updatedPort =
-                        _portfolio.copyWith(holdings: hList);
+                    final List<Holding> hList = List<Holding>.from(
+                      _portfolio.holdings,
+                    )..add(newH);
+                    final Portfolio updatedPort = _portfolio.copyWith(
+                      holdings: hList,
+                    );
 
                     final SettingsProvider settings =
                         Provider.of<SettingsProvider>(context, listen: false);
@@ -646,15 +733,24 @@ class _InvestmentsScreenState extends State<InvestmentsScreen> {
   }
 
   Future<void> _showEditHoldingDialog(Holding holding) async {
-    final TextEditingController nameCtrl = TextEditingController(text: holding.name);
-    final TextEditingController tickerCtrl = TextEditingController(text: holding.ticker);
-    final TextEditingController isinCtrl = TextEditingController(text: holding.isin);
-    final TextEditingController sharesCtrl =
-        TextEditingController(text: holding.shares.toStringAsFixed(6));
-    final TextEditingController investedCtrl =
-        TextEditingController(text: holding.investedAmount.toStringAsFixed(2));
-    final TextEditingController categoryCtrl =
-        TextEditingController(text: holding.category ?? '');
+    final TextEditingController nameCtrl = TextEditingController(
+      text: holding.name,
+    );
+    final TextEditingController tickerCtrl = TextEditingController(
+      text: holding.ticker,
+    );
+    final TextEditingController isinCtrl = TextEditingController(
+      text: holding.isin,
+    );
+    final TextEditingController sharesCtrl = TextEditingController(
+      text: holding.shares.toStringAsFixed(6),
+    );
+    final TextEditingController investedCtrl = TextEditingController(
+      text: holding.investedAmount.toStringAsFixed(2),
+    );
+    final TextEditingController categoryCtrl = TextEditingController(
+      text: holding.category ?? '',
+    );
 
     await showDialog<void>(
       context: context,
@@ -679,13 +775,21 @@ class _InvestmentsScreenState extends State<InvestmentsScreen> {
                 ),
                 TextField(
                   controller: sharesCtrl,
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                  decoration: const InputDecoration(labelText: 'Participaciones'),
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  decoration: const InputDecoration(
+                    labelText: 'Participaciones',
+                  ),
                 ),
                 TextField(
                   controller: investedCtrl,
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                  decoration: const InputDecoration(labelText: 'Capital aportado (€)'),
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  decoration: const InputDecoration(
+                    labelText: 'Capital aportado (€)',
+                  ),
                 ),
                 TextField(
                   controller: categoryCtrl,
@@ -698,11 +802,18 @@ class _InvestmentsScreenState extends State<InvestmentsScreen> {
             TextButton(
               style: TextButton.styleFrom(foregroundColor: Colors.red),
               onPressed: () async {
-                final List<Holding> hList = List<Holding>.from(_portfolio.holdings)
-                  ..removeWhere((Holding h) => h.isin == holding.isin && h.ticker == holding.ticker);
-                final Portfolio updatedPort = _portfolio.copyWith(holdings: hList);
-                final SettingsProvider settings =
-                    Provider.of<SettingsProvider>(context, listen: false);
+                final List<Holding> hList =
+                    List<Holding>.from(_portfolio.holdings)..removeWhere(
+                      (Holding h) =>
+                          h.isin == holding.isin && h.ticker == holding.ticker,
+                    );
+                final Portfolio updatedPort = _portfolio.copyWith(
+                  holdings: hList,
+                );
+                final SettingsProvider settings = Provider.of<SettingsProvider>(
+                  context,
+                  listen: false,
+                );
                 final bool ok = await _syncService!.savePortfolio(
                   settings.investmentsAccountId!,
                   updatedPort,
@@ -721,13 +832,17 @@ class _InvestmentsScreenState extends State<InvestmentsScreen> {
             ElevatedButton(
               onPressed: () async {
                 final double shares =
-                    double.tryParse(sharesCtrl.text.replaceAll(',', '.')) ?? 0.0;
+                    double.tryParse(sharesCtrl.text.replaceAll(',', '.')) ??
+                    0.0;
                 final double invested =
-                    double.tryParse(investedCtrl.text.replaceAll(',', '.')) ?? 0.0;
+                    double.tryParse(investedCtrl.text.replaceAll(',', '.')) ??
+                    0.0;
 
                 final int idx = _portfolio.holdings.indexOf(holding);
                 if (idx != -1) {
-                  final List<Holding> hList = List<Holding>.from(_portfolio.holdings);
+                  final List<Holding> hList = List<Holding>.from(
+                    _portfolio.holdings,
+                  );
                   hList[idx] = holding.copyWith(
                     name: nameCtrl.text.trim(),
                     isin: isinCtrl.text.trim().toUpperCase(),
@@ -738,8 +853,9 @@ class _InvestmentsScreenState extends State<InvestmentsScreen> {
                         ? categoryCtrl.text.trim()
                         : null,
                   );
-                  final Portfolio updatedPort =
-                      _portfolio.copyWith(holdings: hList);
+                  final Portfolio updatedPort = _portfolio.copyWith(
+                    holdings: hList,
+                  );
                   final SettingsProvider settings =
                       Provider.of<SettingsProvider>(context, listen: false);
                   final bool ok = await _syncService!.savePortfolio(
@@ -763,7 +879,9 @@ class _InvestmentsScreenState extends State<InvestmentsScreen> {
   Future<void> _showSyncDialog() async {
     if (_pendingCandidates.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No hay compras nuevas pendientes de sincronizar.')),
+        const SnackBar(
+          content: Text('No hay compras nuevas pendientes de sincronizar.'),
+        ),
       );
       return;
     }
@@ -780,12 +898,15 @@ class _InvestmentsScreenState extends State<InvestmentsScreen> {
           portfolio: _portfolio,
           quoteService: _quoteService,
           onConfirm: (purchases) async {
-            final Portfolio updated = InvestmentsSyncService.applyConfirmedPurchases(
-              currentPortfolio: _portfolio,
-              purchases: purchases,
+            final Portfolio updated =
+                InvestmentsSyncService.applyConfirmedPurchases(
+                  currentPortfolio: _portfolio,
+                  purchases: purchases,
+                );
+            final SettingsProvider settings = Provider.of<SettingsProvider>(
+              context,
+              listen: false,
             );
-            final SettingsProvider settings =
-                Provider.of<SettingsProvider>(context, listen: false);
             final bool ok = await _syncService!.savePortfolio(
               settings.investmentsAccountId!,
               updated,
@@ -814,16 +935,19 @@ class _SyncBottomSheet extends StatefulWidget {
   final MarketQuoteService quoteService;
   final Future<void> Function(
     List<
-        ({
-          SyncCandidate candidate,
-          String isin,
-          String ticker,
-          String name,
-          double shares,
-          double amount,
-          String? category,
-        })> purchases,
-  ) onConfirm;
+      ({
+        SyncCandidate candidate,
+        String isin,
+        String ticker,
+        String name,
+        double shares,
+        double amount,
+        String? category,
+      })
+    >
+    purchases,
+  )
+  onConfirm;
 
   @override
   State<_SyncBottomSheet> createState() => _SyncBottomSheetState();
@@ -872,22 +996,25 @@ class _SyncBottomSheetState extends State<_SyncBottomSheet> {
   ) async {
     String t = initialTicker;
     if (t.isEmpty && isin.isNotEmpty) {
-      final String? resolved = await widget.quoteService.resolveIsinToTicker(isin);
+      final String? resolved = await widget.quoteService.resolveIsinToTicker(
+        isin,
+      );
       if (resolved != null) {
         t = resolved;
         _tickerControllers[c.transactionId]?.text = t;
       }
     }
 
-    if (t.isNotEmpty && (_sharesControllers[c.transactionId]?.text.isEmpty ?? true)) {
-      final double? closePrice =
-          await widget.quoteService.fetchHistoricalClosePrice(t, c.date);
+    if (t.isNotEmpty &&
+        (_sharesControllers[c.transactionId]?.text.isEmpty ?? true)) {
+      final double? closePrice = await widget.quoteService
+          .fetchHistoricalClosePrice(t, c.date);
       if (closePrice != null && closePrice > 0) {
         final double estimated = c.amount / closePrice;
         if (mounted) {
           setState(() {
-            _sharesControllers[c.transactionId]?.text =
-                estimated.toStringAsFixed(6);
+            _sharesControllers[c.transactionId]?.text = estimated
+                .toStringAsFixed(6);
           });
         }
       }
@@ -926,7 +1053,9 @@ class _SyncBottomSheetState extends State<_SyncBottomSheet> {
               itemCount: widget.candidates.length,
               itemBuilder: (BuildContext context, int index) {
                 final SyncCandidate c = widget.candidates[index];
-                final bool isSelected = _selectedCandidates.contains(c.transactionId);
+                final bool isSelected = _selectedCandidates.contains(
+                  c.transactionId,
+                );
 
                 return Card(
                   margin: const EdgeInsets.symmetric(vertical: 6),
@@ -969,7 +1098,8 @@ class _SyncBottomSheetState extends State<_SyncBottomSheet> {
                             children: <Widget>[
                               Expanded(
                                 child: TextField(
-                                  controller: _tickerControllers[c.transactionId],
+                                  controller:
+                                      _tickerControllers[c.transactionId],
                                   decoration: const InputDecoration(
                                     labelText: 'Ticker',
                                     isDense: true,
@@ -979,10 +1109,12 @@ class _SyncBottomSheetState extends State<_SyncBottomSheet> {
                               const SizedBox(width: 8),
                               Expanded(
                                 child: TextField(
-                                  controller: _sharesControllers[c.transactionId],
-                                  keyboardType: const TextInputType.numberWithOptions(
-                                    decimal: true,
-                                  ),
+                                  controller:
+                                      _sharesControllers[c.transactionId],
+                                  keyboardType:
+                                      const TextInputType.numberWithOptions(
+                                        decimal: true,
+                                      ),
                                   decoration: const InputDecoration(
                                     labelText: 'Participaciones',
                                     isDense: true,
@@ -1016,30 +1148,40 @@ class _SyncBottomSheetState extends State<_SyncBottomSheet> {
                       : () async {
                           setState(() => _isSaving = true);
                           final List<
-                              ({
-                                SyncCandidate candidate,
-                                String isin,
-                                String ticker,
-                                String name,
-                                double shares,
-                                double amount,
-                                String? category,
-                              })> purchases = [];
+                            ({
+                              SyncCandidate candidate,
+                              String isin,
+                              String ticker,
+                              String name,
+                              double shares,
+                              double amount,
+                              String? category,
+                            })
+                          >
+                          purchases = [];
 
                           for (final SyncCandidate c in widget.candidates) {
-                            if (!_selectedCandidates.contains(c.transactionId)) {
+                            if (!_selectedCandidates.contains(
+                              c.transactionId,
+                            )) {
                               continue;
                             }
 
                             final String isin =
-                                _isinControllers[c.transactionId]?.text.trim() ?? '';
+                                _isinControllers[c.transactionId]?.text
+                                    .trim() ??
+                                '';
                             final String ticker =
-                                _tickerControllers[c.transactionId]?.text.trim() ?? '';
+                                _tickerControllers[c.transactionId]?.text
+                                    .trim() ??
+                                '';
                             final String name =
-                                _nameControllers[c.transactionId]?.text.trim() ?? '';
-                            final double shares = double.tryParse(
-                                  _sharesControllers[c.transactionId]
-                                          ?.text
+                                _nameControllers[c.transactionId]?.text
+                                    .trim() ??
+                                '';
+                            final double shares =
+                                double.tryParse(
+                                  _sharesControllers[c.transactionId]?.text
                                           .replaceAll(',', '.') ??
                                       '0',
                                 ) ??

@@ -7,7 +7,10 @@ void main() {
     test('parses empty or null notes as null', () {
       expect(PortfolioNotesParser.parsePortfolio(null), isNull);
       expect(PortfolioNotesParser.parsePortfolio(''), isNull);
-      expect(PortfolioNotesParser.parsePortfolio('Notas del usuario sin cartera'), isNull);
+      expect(
+        PortfolioNotesParser.parsePortfolio('Notas del usuario sin cartera'),
+        isNull,
+      );
     });
 
     test('parses well-formed portfolio block from notes', () {
@@ -41,7 +44,10 @@ Texto posterior que tampoco debe borrarse.
       expect(portfolio, isNotNull);
       expect(portfolio!.version, equals(1));
       expect(portfolio.broker, equals('trade_republic'));
-      expect(portfolio.processedTransactionIds, equals(<String>['1042', '1089', '1120']));
+      expect(
+        portfolio.processedTransactionIds,
+        equals(<String>['1042', '1089', '1120']),
+      );
       expect(portfolio.holdings.length, equals(1));
 
       final Holding holding = portfolio.holdings.first;
@@ -100,54 +106,75 @@ Fin de notas personalizadas.
       expect(resultNotes.contains('Fin de notas personalizadas.'), isTrue);
 
       // Verifica que el nuevo bloque contenga los nuevos datos
-      final Portfolio? parsedBack = PortfolioNotesParser.parsePortfolio(resultNotes);
+      final Portfolio? parsedBack = PortfolioNotesParser.parsePortfolio(
+        resultNotes,
+      );
       expect(parsedBack, isNotNull);
-      expect(parsedBack!.processedTransactionIds, equals(<String>['101', '102']));
+      expect(
+        parsedBack!.processedTransactionIds,
+        equals(<String>['101', '102']),
+      );
       expect(parsedBack.holdings.length, equals(1));
       expect(parsedBack.holdings.first.isin, equals('IE00BK5BQT80'));
       expect(parsedBack.holdings.first.shares, equals(10.543210));
     });
 
-    test('appends portfolio to existing notes when no tags present without destroying text', () {
-      const String initialNotes = 'Solo unas notas que ya existían en Firefly III.';
+    test(
+      'appends portfolio to existing notes when no tags present without destroying text',
+      () {
+        const String initialNotes =
+            'Solo unas notas que ya existían en Firefly III.';
 
-      final Portfolio newPortfolio = Portfolio(
-        version: 1,
-        broker: 'trade_republic',
-        holdings: <Holding>[
-          Holding(
-            isin: 'US0378331005',
-            ticker: 'APC.F',
-            name: 'Apple Inc.',
-            shares: 5.0,
-            investedAmount: 950.0,
+        final Portfolio newPortfolio = Portfolio(
+          version: 1,
+          broker: 'trade_republic',
+          holdings: <Holding>[
+            Holding(
+              isin: 'US0378331005',
+              ticker: 'APC.F',
+              name: 'Apple Inc.',
+              shares: 5.0,
+              investedAmount: 950.0,
+            ),
+          ],
+        );
+
+        final String resultNotes =
+            PortfolioNotesParser.updateNotesWithPortfolio(
+              initialNotes,
+              newPortfolio,
+            );
+
+        expect(
+          resultNotes.startsWith(
+            'Solo unas notas que ya existían en Firefly III.',
           ),
-        ],
-      );
+          isTrue,
+        );
+        expect(resultNotes.contains(PortfolioNotesParser.startTag), isTrue);
+        expect(resultNotes.contains(PortfolioNotesParser.endTag), isTrue);
 
-      final String resultNotes = PortfolioNotesParser.updateNotesWithPortfolio(
-        initialNotes,
-        newPortfolio,
-      );
-
-      expect(resultNotes.startsWith('Solo unas notas que ya existían en Firefly III.'), isTrue);
-      expect(resultNotes.contains(PortfolioNotesParser.startTag), isTrue);
-      expect(resultNotes.contains(PortfolioNotesParser.endTag), isTrue);
-
-      final Portfolio? parsed = PortfolioNotesParser.parsePortfolio(resultNotes);
-      expect(parsed, isNotNull);
-      expect(parsed!.holdings.first.ticker, equals('APC.F'));
-    });
+        final Portfolio? parsed = PortfolioNotesParser.parsePortfolio(
+          resultNotes,
+        );
+        expect(parsed, isNotNull);
+        expect(parsed!.holdings.first.ticker, equals('APC.F'));
+      },
+    );
   });
 
   group('Regex Matcher Tests', () {
     test('extracts valid European ISINs from diverse transaction texts', () {
       expect(
-        PortfolioNotesParser.extractIsin('Plan de inversión IE00B4L5Y983 Core MSCI World'),
+        PortfolioNotesParser.extractIsin(
+          'Plan de inversión IE00B4L5Y983 Core MSCI World',
+        ),
         equals('IE00B4L5Y983'),
       );
       expect(
-        PortfolioNotesParser.extractIsin('Compra LU1681045370 Amundi Prime Global'),
+        PortfolioNotesParser.extractIsin(
+          'Compra LU1681045370 Amundi Prime Global',
+        ),
         equals('LU1681045370'),
       );
       expect(
@@ -160,23 +187,26 @@ Fin de notas personalizadas.
       );
     });
 
-    test('extracts shares from transaction description with decimal formats', () {
-      expect(
-        PortfolioNotesParser.extractShares('Compra de 4.125678 títulos'),
-        equals(4.125678),
-      );
-      expect(
-        PortfolioNotesParser.extractShares('Ejecutadas 12,500000 acciones'),
-        equals(12.5),
-      );
-      expect(
-        PortfolioNotesParser.extractShares('shares: 0.854321 en broker'),
-        equals(0.854321),
-      );
-      expect(
-        PortfolioNotesParser.extractShares('Traspaso periódico mensual'),
-        isNull,
-      );
-    });
+    test(
+      'extracts shares from transaction description with decimal formats',
+      () {
+        expect(
+          PortfolioNotesParser.extractShares('Compra de 4.125678 títulos'),
+          equals(4.125678),
+        );
+        expect(
+          PortfolioNotesParser.extractShares('Ejecutadas 12,500000 acciones'),
+          equals(12.5),
+        );
+        expect(
+          PortfolioNotesParser.extractShares('shares: 0.854321 en broker'),
+          equals(0.854321),
+        );
+        expect(
+          PortfolioNotesParser.extractShares('Traspaso periódico mensual'),
+          isNull,
+        );
+      },
+    );
   });
 }
