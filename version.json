@@ -1,6 +1,6 @@
 {
-  "version": "1.0.3 (build 4)",
-  "versionCode": 43,
-  "apkUrl": "https://github.com/VibingDroid/Vibenance/releases/download/v1.0.3/vibenance-arm64-v8a.apk",
-  "changelog": "### Added\n- Logotipos oficiales SVG de bancos descargados de Brandfetch e integrados en cuentas, pantalla de inicio y evolución (patrimonio y saldo)."
+  "version": "1.0.4 (build 5)",
+  "versionCode": 53,
+  "apkUrl": "https://github.com/VibingDroid/Vibenance/releases/download/v1.0.4/vibenance-arm64-v8a.apk",
+  "changelog": "### Fixed\n- **Insignias y logos bancarios:** corrección de renderizado SVG con estilos inline en Trade Republic, ING, CaixaBank, Revolut, N26 y Wise.\n- **Trade Republic:** actualización al color corporativo oficial negro (`#000000`) y logo blanco, con detección por palabras clave ampliada.\n- **Modo oscuro:** contraste y visibilidad optimizados en `BankLogoBadge` para insignias sobre fondos oscuros mediante borde adaptativo sutil."
 }
