@@ -2,6 +2,14 @@
 
 Todas las novedades notables de Vibenance se documentan en este archivo.
 
+## [1.0.5] - 2026-10-31
+
+### Added
+- **Módulo de Inversiones (Beta):** seguimiento de carteras de inversión enfocado en brókers como Trade Republic de forma 100% serverless apoyándose en el campo `notes` de cuentas tipo activo en Firefly III.
+- **Sincronización de compras:** detección inteligente e idempotente de compras periódicas importadas en Firefly III con extracción de ISIN, cálculo de participaciones y registro seguro.
+- **Cotizaciones de mercado:** integración con Yahoo Finance con caché en memoria (TTL 5 min), resolución de ISIN a ticker y cotizaciones históricas por fecha.
+- **Ajustes y navegación:** activación opt-in (`enable_investments_module`), selector de cuenta de inversión y acceso contextual en el menú lateral.
+
 ## [1.0.4] - 2026-10-31
 
 ### Fixed

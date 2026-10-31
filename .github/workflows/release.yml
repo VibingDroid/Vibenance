@@ -169,7 +169,7 @@ jobs:
           cp $(find build/app/outputs/flutter-apk/ -name "*x86_64*release.apk" | head -n 1) "dist/${PREFIX}-x86_64.apk"
 
       - name: Build Play Store App Bundle (Flavor play)
-        if: steps.versioning.outputs.channel == 'stable'
+        if: steps.versioning.outputs.channel == 'stable' || inputs.play_track != ''
         run: |
           flutter build appbundle \
             --flavor play \
@@ -269,14 +269,16 @@ jobs:
 
       - name: Preparar notas de versión y detectar canal activo de Google Play
         id: play_config
-        if: steps.versioning.outputs.channel == 'stable'
+        if: steps.versioning.outputs.channel == 'stable' || inputs.play_track != ''
         env:
           SA_JSON: ${{ secrets.PLAY_STORE_SERVICE_ACCOUNT_JSON }}
           INPUT_TRACK: ${{ inputs.play_track }}
         run: |
           mkdir -p whatsnew
-          cp fastlane/metadata/android/es-ES/changelogs/1.txt whatsnew/whatsnew-es-ES
-          cp fastlane/metadata/android/en-US/changelogs/1.txt whatsnew/whatsnew-en-US
+          LATEST_ES=$(ls -v fastlane/metadata/android/es-ES/changelogs/*.txt 2>/dev/null | tail -n 1)
+          LATEST_EN=$(ls -v fastlane/metadata/android/en-US/changelogs/*.txt 2>/dev/null | tail -n 1)
+          cp "${LATEST_ES:-fastlane/metadata/android/es-ES/changelogs/1.txt}" whatsnew/whatsnew-es-ES
+          cp "${LATEST_EN:-fastlane/metadata/android/en-US/changelogs/1.txt}" whatsnew/whatsnew-en-US
 
           PLAY_TRACK=$(python3 - << 'EOF'
           import json, os, time, base64, urllib.request, subprocess
@@ -340,7 +342,7 @@ jobs:
 
       - name: Publicar AAB en Google Play Store
         if: |
-          steps.versioning.outputs.channel == 'stable' &&
+          (steps.versioning.outputs.channel == 'stable' || inputs.play_track != '') &&
           (startsWith(github.ref, 'refs/tags/') || github.event_name == 'release' || github.event_name == 'workflow_dispatch')
         continue-on-error: true
         uses: r0adkll/upload-google-play@v1

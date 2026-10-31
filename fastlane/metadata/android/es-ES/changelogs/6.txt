@@ -1,0 +1,1 @@
+Módulo de Inversiones (Beta): seguimiento de cartera, cotizaciones en tiempo real y sincronización automática de compras periódicas.

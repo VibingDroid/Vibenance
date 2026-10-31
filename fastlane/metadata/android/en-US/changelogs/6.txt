@@ -1,0 +1,1 @@
+Investments Module (Beta): portfolio tracking, real-time quotes, and automatic synchronization of recurring purchases.
