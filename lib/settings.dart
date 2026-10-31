@@ -235,6 +235,8 @@ class SettingsProvider with ChangeNotifier {
   static const String settingAICategorizerEnabled = "AI_CATEGORIZER_ENABLED";
   static const String settingAICategorizerUrl = "AI_CATEGORIZER_URL";
   static const String settingAICategorizerKey = "AI_CATEGORIZER_KEY";
+  static const String settingInvestmentsEnabled = "INVESTMENTS_ENABLED";
+  static const String settingInvestmentsAccountId = "INVESTMENTS_ACCOUNT_ID";
 
   bool get debug => _boolSettings[.debug];
   bool get lock => _boolSettings[.lock];
@@ -300,6 +302,12 @@ class SettingsProvider with ChangeNotifier {
 
   String? _aiCategorizerKey;
   String? get aiCategorizerKey => _aiCategorizerKey;
+
+  bool _investmentsEnabled = false;
+  bool get investmentsEnabled => _investmentsEnabled;
+
+  String? _investmentsAccountId;
+  String? get investmentsAccountId => _investmentsAccountId;
 
   Future<void> setHomePatrimonyPeriod(HomePatrimonyPeriod period) async {
     _homePatrimonyPeriod = period;
@@ -536,6 +544,9 @@ class SettingsProvider with ChangeNotifier {
         await prefs.getString(settingAICategorizerUrl) ??
         "http://127.0.0.1:3000";
     _aiCategorizerKey = await prefs.getString(settingAICategorizerKey);
+    _investmentsEnabled =
+        await prefs.getBool(settingInvestmentsEnabled) ?? false;
+    _investmentsAccountId = await prefs.getString(settingInvestmentsAccountId);
 
     _loaded = _loading = true;
     log.finest(() => "notify SettingsProvider->loadSettings()");
@@ -945,6 +956,38 @@ class SettingsProvider with ChangeNotifier {
     }
 
     log.finest(() => "notify SettingsProvider->setAICategorizerKey()");
+    notifyListeners();
+  }
+
+  Future<void> setInvestmentsEnabled(bool enabled) async {
+    if (enabled == _investmentsEnabled) {
+      return;
+    }
+
+    _investmentsEnabled = enabled;
+    await SharedPreferencesAsync().setBool(
+      settingInvestmentsEnabled,
+      enabled,
+    );
+
+    log.finest(() => "notify SettingsProvider->setInvestmentsEnabled()");
+    notifyListeners();
+  }
+
+  Future<void> setInvestmentsAccountId(String? accountId) async {
+    if (accountId == _investmentsAccountId) {
+      return;
+    }
+
+    _investmentsAccountId = accountId;
+    final SharedPreferencesAsync prefs = SharedPreferencesAsync();
+    if (accountId == null || accountId.isEmpty) {
+      await prefs.remove(settingInvestmentsAccountId);
+    } else {
+      await prefs.setString(settingInvestmentsAccountId, accountId);
+    }
+
+    log.finest(() => "notify SettingsProvider->setInvestmentsAccountId()");
     notifyListeners();
   }
 

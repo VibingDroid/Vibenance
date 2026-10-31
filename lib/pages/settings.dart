@@ -25,6 +25,7 @@ import 'package:vibenance/pages/settings/notifications.dart';
 import 'package:vibenance/pages/settings/push_notifications.dart';
 import 'package:vibenance/services/push_notification_service.dart';
 import 'package:vibenance/pages/settings/ai_categorizer.dart';
+import 'package:vibenance/pages/settings/investments.dart';
 import 'package:vibenance/settings.dart';
 import 'package:vibenance/updater.dart';
 
@@ -324,6 +325,8 @@ class SettingsPageState extends State<SettingsPage>
           ),
         ],
         const AICategorizerSettingsSection(),
+        const Divider(),
+        const InvestmentsSettingsSection(),
         const Divider(),
         const SettingsSectionHeader(title: "Acerca de"),
         FutureBuilder<PackageInfo>(
