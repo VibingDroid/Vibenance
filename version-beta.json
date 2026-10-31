@@ -1,0 +1,6 @@
+{
+  "version": "1.0.5 (build 6)",
+  "versionCode": 63,
+  "apkUrl": "https://github.com/VibingDroid/Vibenance/releases/download/v1.0.5/vibenance-beta-arm64-v8a.apk",
+  "changelog": "### Added\n- **Módulo de Inversiones (Beta):** seguimiento de carteras de inversión enfocado en brókers como Trade Republic de forma 100% serverless apoyándose en el campo `notes` de cuentas tipo activo en Firefly III.\n- **Sincronización de compras:** detección inteligente e idempotente de compras periódicas importadas en Firefly III con extracción de ISIN, cálculo de participaciones y registro seguro.\n- **Cotizaciones de mercado:** integración con Yahoo Finance con caché en memoria (TTL 5 min), resolución de ISIN a ticker y cotizaciones históricas por fecha.\n- **Ajustes y navegación:** activación opt-in (`enable_investments_module`), selector de cuenta de inversión y acceso contextual en el menú lateral."
+}
