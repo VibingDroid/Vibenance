@@ -1,0 +1,19 @@
+services:
+  tr-bridge:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: vibenance-tr-bridge
+    restart: unless-stopped
+    environment:
+      - TR_BRIDGE_API_KEY=your_secret_token_here
+      - TR_STATE_DIR=/app/data/tr_state
+      - ALLOWED_ORIGINS=*
+    volumes:
+      - tr_state_data:/app/data/tr_state
+    ports:
+      - "8085:8000"
+
+volumes:
+  tr_state_data:
+    name: vibenance_tr_state_data
