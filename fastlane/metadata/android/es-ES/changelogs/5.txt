@@ -1,0 +1,1 @@
+Corrección de renderizado en logos e insignias bancarias (Trade Republic, ING, CaixaBank, Revolut) y mejora de contraste en modo oscuro.

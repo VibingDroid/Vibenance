@@ -2,6 +2,13 @@
 
 Todas las novedades notables de Vibenance se documentan en este archivo.
 
+## [1.0.4] - 2026-10-31
+
+### Fixed
+- **Insignias y logos bancarios:** corrección de renderizado SVG con estilos inline en Trade Republic, ING, CaixaBank, Revolut, N26 y Wise.
+- **Trade Republic:** actualización al color corporativo oficial negro (`#000000`) y logo blanco, con detección por palabras clave ampliada.
+- **Modo oscuro:** contraste y visibilidad optimizados en `BankLogoBadge` para insignias sobre fondos oscuros mediante borde adaptativo sutil.
+
 ## [1.0.3] - 2026-10-31
 
 ### Added

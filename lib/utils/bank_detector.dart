@@ -181,7 +181,7 @@ const BankInfo _myinvestor = BankInfo(
 const BankInfo _tradeRepublic = BankInfo(
   shortLabel: 'TR',
   fullName: 'Trade Republic',
-  color: Color(0xFF00D47B),
+  color: Color(0xFF000000),
   assetPath: 'assets/banks/traderepublic.svg',
 );
 
@@ -241,6 +241,7 @@ const Map<String, BankInfo> _banksByKeyword = <String, BankInfo>{
   'bnext': _bnext,
   'myinvestor': _myinvestor,
   'trade republic': _tradeRepublic,
+  'traderepublic': _tradeRepublic,
 };
 
 final RegExp _whitespaceExp = RegExp(r'\s+');

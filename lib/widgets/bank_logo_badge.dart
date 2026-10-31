@@ -75,15 +75,28 @@ class BankLogoBadge extends StatelessWidget {
       content = Icon(icon, color: Colors.white, size: size * 0.5);
     }
 
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
+    final bool isVeryDark = bgColor.computeLuminance() < 0.05;
+
     return Container(
       width: size,
       height: size,
       decoration: BoxDecoration(
         color: bgColor,
         borderRadius: BorderRadius.circular(size * 0.25),
+        border: isDark && isVeryDark
+            ? Border.all(
+                color: Theme.of(
+                  context,
+                ).colorScheme.outlineVariant.withValues(alpha: 0.5),
+                width: 1,
+              )
+            : null,
         boxShadow: <BoxShadow>[
           BoxShadow(
-            color: bgColor.withValues(alpha: 0.3),
+            color: (isDark && isVeryDark)
+                ? Colors.black.withValues(alpha: 0.5)
+                : bgColor.withValues(alpha: 0.3),
             blurRadius: 6,
             offset: const Offset(0, 2),
           ),

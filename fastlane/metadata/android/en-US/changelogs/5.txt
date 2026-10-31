@@ -1,0 +1,1 @@
+Fix rendering of bank logos and badges (Trade Republic, ING, CaixaBank, Revolut) and improve dark mode contrast.
