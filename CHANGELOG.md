@@ -2,6 +2,11 @@
 
 Todas las novedades notables de Vibenance se documentan en este archivo.
 
+## [1.0.6] - 2026-11-01
+
+### Changed
+- **Ajustes y estabilidad:** refinamiento de la configuración de notificaciones y optimizaciones generales de la interfaz.
+
 ## [1.0.5] - 2026-11-01
 
 ### Changed

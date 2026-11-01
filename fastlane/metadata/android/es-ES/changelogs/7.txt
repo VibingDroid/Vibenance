@@ -1,0 +1,1 @@
+Ajustes de estabilidad, refinamiento de notificaciones y mejoras generales de la interfaz.
