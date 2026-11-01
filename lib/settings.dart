@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -237,6 +238,10 @@ class SettingsProvider with ChangeNotifier {
   static const String settingAICategorizerKey = "AI_CATEGORIZER_KEY";
   static const String settingInvestmentsEnabled = "enable_investments_module";
   static const String settingInvestmentsAccountId = "INVESTMENTS_ACCOUNT_ID";
+  static const String settingTrIntegrationEnabled = "tr_integration_enabled";
+  static const String settingTrBridgeUrl = "tr_bridge_url";
+  static const String settingTrBridgeApiKey = "tr_bridge_api_key";
+  static const String settingTrFireflyAccountId = "tr_firefly_account_id";
 
   bool get debug => _boolSettings[.debug];
   bool get lock => _boolSettings[.lock];
@@ -305,6 +310,8 @@ class SettingsProvider with ChangeNotifier {
 
   bool _investmentsEnabled = false;
   bool get investmentsEnabled => _investmentsEnabled;
+  bool _trIntegrationEnabled = false;
+  bool get trIntegrationEnabledSync => _trIntegrationEnabled;
 
   String? _investmentsAccountId;
   String? get investmentsAccountId => _investmentsAccountId;
@@ -549,6 +556,8 @@ class SettingsProvider with ChangeNotifier {
         await prefs.getBool("INVESTMENTS_ENABLED") ??
         false;
     _investmentsAccountId = await prefs.getString(settingInvestmentsAccountId);
+    _trIntegrationEnabled =
+        await prefs.getBool(settingTrIntegrationEnabled) ?? false;
 
     _loaded = _loading = true;
     log.finest(() => "notify SettingsProvider->loadSettings()");
@@ -988,6 +997,39 @@ class SettingsProvider with ChangeNotifier {
 
     log.finest(() => "notify SettingsProvider->setInvestmentsAccountId()");
     notifyListeners();
+  }
+
+  Future<bool> get trIntegrationEnabled async =>
+      (await SharedPreferencesAsync().getBool(settingTrIntegrationEnabled)) ?? false;
+  Future<void> setTrIntegrationEnabled(bool value) async {
+    _trIntegrationEnabled = value;
+    await SharedPreferencesAsync().setBool(settingTrIntegrationEnabled, value);
+    notifyListeners();
+  }
+
+  Future<String> get trBridgeUrl async =>
+      (await SharedPreferencesAsync().getString(settingTrBridgeUrl)) ?? '';
+  Future<void> setTrBridgeUrl(String value) async {
+    await SharedPreferencesAsync().setString(settingTrBridgeUrl, value);
+  }
+
+  Future<String> get trBridgeApiKey async =>
+      (await const FlutterSecureStorage().read(key: settingTrBridgeApiKey)) ?? '';
+  Future<void> setTrBridgeApiKey(String value) async {
+    await const FlutterSecureStorage().write(
+      key: settingTrBridgeApiKey,
+      value: value,
+    );
+  }
+
+  Future<String?> get trFireflyAccountId =>
+      SharedPreferencesAsync().getString(settingTrFireflyAccountId);
+  Future<void> setTrFireflyAccountId(String? value) async {
+    if (value == null || value.isEmpty) {
+      await SharedPreferencesAsync().remove(settingTrFireflyAccountId);
+    } else {
+      await SharedPreferencesAsync().setString(settingTrFireflyAccountId, value);
+    }
   }
 
   Future<void> notificationHistoryAdd(PastNotification notification) async {

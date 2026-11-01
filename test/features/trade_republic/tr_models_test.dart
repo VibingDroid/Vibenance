@@ -75,12 +75,11 @@ void main() {
       expect(snapshot.positions.length, 1);
       expect(snapshot.positions.first.name, 'Apple Inc.');
       expect(snapshot.positions.first.isin, 'US0378331005');
-      expect(snapshot.positions.first.isStock, isTrue);
-      expect(snapshot.positions.first.isCrypto, isFalse);
+      expect(snapshot.positions.first.instrumentType, 'stock');
 
       expect(snapshot.savingsPlans.length, 1);
       expect(snapshot.savingsPlans.first.id, 'plan-1');
-      expect(snapshot.savingsPlans.first.intervalSpanish, 'Mensual');
+      expect(snapshot.savingsPlans.first.interval, 'monthly');
       expect(snapshot.savingsPlans.first.paused, isFalse);
     });
 

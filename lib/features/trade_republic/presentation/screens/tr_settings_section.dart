@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:vibenance/features/trade_republic/data/models/tr_config_model.dart';
-import 'package:vibenance/features/trade_republic/domain/tr_repository.dart';
 import 'package:vibenance/features/trade_republic/presentation/providers/tr_portfolio_provider.dart';
 
 class TrSettingsSection extends StatefulWidget {
@@ -231,11 +230,11 @@ class _TrSettingsSectionState extends State<TrSettingsSection> {
                 child: Row(
                   children: <Widget>[
                     Icon(
-                      _testSuccess == true
+                      (_testSuccess ?? false)
                           ? Icons.check_circle
                           : Icons.error_outline,
                       size: 16,
-                      color: _testSuccess == true
+                      color: (_testSuccess ?? false)
                           ? Colors.green.shade700
                           : Colors.red.shade700,
                     ),
@@ -245,7 +244,7 @@ class _TrSettingsSectionState extends State<TrSettingsSection> {
                         _testStatusMessage!,
                         style: TextStyle(
                           fontSize: 13,
-                          color: _testSuccess == true
+                          color: (_testSuccess ?? false)
                               ? Colors.green.shade700
                               : Colors.red.shade700,
                         ),

@@ -297,6 +297,14 @@ class _WaterflyAppState extends State<WaterflyApp> {
             ChangeNotifierProvider<LayoutProvider>.value(
               value: _layoutProvider,
             ),
+            ChangeNotifierProvider<TrPortfolioProvider>(
+              create: (_) => TrPortfolioProvider(
+                repository: TrRepositoryImpl(
+                  client: TrBridgeApiClient(),
+                  cacheService: TrLocalCacheService(),
+                ),
+              ),
+            ),
           ],
           builder: (BuildContext context, _) {
             final SettingsProvider settings = context.watch<SettingsProvider>();

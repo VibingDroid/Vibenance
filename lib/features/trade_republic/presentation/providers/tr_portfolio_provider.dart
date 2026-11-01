@@ -11,6 +11,7 @@ class TrPortfolioProvider extends ChangeNotifier {
   TrPortfolioProvider({required TrRepository repository}) : _repository = repository;
 
   final TrRepository _repository;
+  TrRepository get repository => _repository;
 
   TrSnapshotModel? _snapshot;
   TrSnapshotModel? get snapshot => _snapshot;

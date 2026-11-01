@@ -20,16 +20,28 @@ class TrSessionExpiredException extends TrApiException {
 
 class TrBridgeApiClient {
   TrBridgeApiClient({
-    required String baseUrl,
+    String baseUrl = '',
     String apiKey = '',
     http.Client? httpClient,
   })  : _baseUrl = baseUrl.replaceAll(RegExp(r'/+$'), ''),
         _apiKey = apiKey,
         _client = httpClient ?? http.Client();
 
-  final String _baseUrl;
-  final String _apiKey;
+  String _baseUrl;
+  String _apiKey;
   final http.Client _client;
+
+  String get baseUrl => _baseUrl;
+  String get apiKey => _apiKey;
+
+  void updateConfig({String? baseUrl, String? apiKey}) {
+    if (baseUrl != null) {
+      _baseUrl = baseUrl.replaceAll(RegExp(r'/+$'), '');
+    }
+    if (apiKey != null) {
+      _apiKey = apiKey;
+    }
+  }
 
   Map<String, String> get _headers => <String, String>{
         'Content-Type': 'application/json',
@@ -73,6 +85,26 @@ class TrBridgeApiClient {
       'Error connecting to bridge health: ${response.statusCode}',
       statusCode: response.statusCode,
     );
+  }
+
+  Future<bool> healthCheck({String? testUrl, String? testApiKey}) async {
+    try {
+      await checkHealth(
+        overrideUrl: testUrl,
+        overrideApiKey: testApiKey,
+      );
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Future<TrSnapshotModel> getSnapshot({bool enrich = true}) {
+    return fetchPortfolioSnapshot(enrich: enrich);
+  }
+
+  Future<List<TrTransactionModel>> getTransactions() {
+    return fetchTransactions();
   }
 
   Future<Map<String, dynamic>> login({

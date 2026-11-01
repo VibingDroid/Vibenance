@@ -4,6 +4,7 @@ import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
 import 'package:vibenance/animations.dart';
 import 'package:vibenance/auth.dart';
+import 'package:vibenance/features/trade_republic/presentation/screens/tr_dashboard_screen.dart';
 import 'package:vibenance/generated/l10n/app_localizations.dart';
 import 'package:vibenance/layout.dart';
 import 'package:vibenance/pages/accounts.dart';
@@ -141,6 +142,13 @@ class NavPageState extends State<NavPage> with TickerProviderStateMixin {
           InvestmentsScreen(),
           Icon(Icons.trending_up_outlined),
           Icon(Icons.trending_up),
+        ),
+      if (context.watch<SettingsProvider>().trIntegrationEnabledSync)
+        const NavDestination(
+          "Inversiones (TR)",
+          TrDashboardScreen(),
+          Icon(Icons.candlestick_chart_outlined),
+          Icon(Icons.candlestick_chart),
         ),
       const NavDestination(
         "Importación bancaria",

@@ -61,18 +61,23 @@ void main() {
         httpClient: mockClient,
       );
 
-      final Map<String, dynamic> res = await client.login('+34600000000', '1234');
+      final Map<String, dynamic> res = await client.login(
+        phoneNumber: '+34600000000',
+        pin: '1234',
+      );
       expect(res['process_id'], 'proc-abc-123');
     });
 
-    test('getSnapshot throws TrSessionExpiredException on 401 TR_SESSION_EXPIRED', () async {
-      final MockClient mockClient = MockClient((http.Request request) async {
-        return http.Response(
-          jsonEncode(<String, dynamic>{
-            'error_code': 'TR_SESSION_EXPIRED',
-            'message': 'Session expired',
-          }),
-          401,
+    test('getSnapshot throws TrSessionExpiredException on 401 TR_SESSION_EXPIRED', () {
+      final MockClient mockClient = MockClient((http.Request request) {
+        return Future<http.Response>.value(
+          http.Response(
+            jsonEncode(<String, dynamic>{
+              'error_code': 'TR_SESSION_EXPIRED',
+              'message': 'Session expired',
+            }),
+            401,
+          ),
         );
       });
 

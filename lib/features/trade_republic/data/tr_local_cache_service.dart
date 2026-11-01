@@ -35,6 +35,8 @@ class TrLocalCacheService {
     return null;
   }
 
+  Future<void> clear() => clearCache();
+
   Future<void> clearCache() async {
     try {
       final SharedPreferencesAsync prefs = SharedPreferencesAsync();

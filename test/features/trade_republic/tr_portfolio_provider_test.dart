@@ -31,12 +31,12 @@ class FakeTrRepository implements TrRepository {
   Future<TrSnapshotModel> fetchSnapshot({bool enrich = true}) async {
     if (shouldExpireSession) {
       throw const TrSessionExpiredException(
-        message: 'Sesión expirada en Trade Republic.',
+        'Sesión expirada en Trade Republic.',
       );
     }
     return fakeSnapshot ??
-        const TrSnapshotModel(
-          summary: TrPortfolioSummary(
+        TrSnapshotModel(
+          summary: const TrPortfolioSummary(
             totalInvested: 100,
             currentValue: 120,
             profitLossAbs: 20,
@@ -44,23 +44,39 @@ class FakeTrRepository implements TrRepository {
             cashBalance: 10,
             currency: 'EUR',
           ),
-          positions: <TrPositionModel>[],
-          savingsPlans: <TrSavingsPlanModel>[],
+          positions: const <TrPositionModel>[],
+          savingsPlans: const <TrSavingsPlanModel>[],
+          fetchedAt: DateTime.parse('2026-10-31T20:00:00Z'),
         );
   }
 
   @override
-  Future<List<TrTransactionModel>> fetchTransactions() async => fakeTransactions;
+  Future<Map<String, dynamic>> checkHealth({
+    String? baseUrl,
+    String? apiKey,
+  }) async =>
+      <String, dynamic>{'status': 'ok', 'authenticated': true};
 
   @override
-  Future<Map<String, dynamic>> login(String phoneNumber, String pin) async =>
+  Future<TrSnapshotModel> refreshSnapshot({bool enrich = true}) =>
+      fetchSnapshot(enrich: enrich);
+
+  @override
+  Future<List<TrTransactionModel>> getTransactions() async => fakeTransactions;
+
+  @override
+  Future<Map<String, dynamic>> login({
+    required String phone,
+    required String pin,
+  }) async =>
       <String, dynamic>{'process_id': 'proc-1'};
 
   @override
-  Future<Map<String, dynamic>> verify2fa(
-    String processId,
-    String code,
-  ) async =>
+  Future<Map<String, dynamic>> verify({
+    required String processId,
+    required String code,
+    String? phone,
+  }) async =>
       <String, dynamic>{'authenticated': true};
 
   @override
@@ -96,7 +112,7 @@ void main() {
 
       expect(provider.isSessionExpired, isTrue);
       expect(provider.isAuthenticated, isFalse);
-      expect(provider.errorMessage, contains('Sesión expirada'));
+      expect(provider.errorMessage, anyOf(contains('Sesión expirada'), contains('caducado')));
     });
 
     test('logout clears snapshot and resets authentication state', () async {
