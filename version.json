@@ -1,6 +1,6 @@
 {
-  "version": "1.0.6 (build 7)",
-  "versionCode": 73,
+  "version": "1.0.6 (build 11)",
+  "versionCode": 113,
   "apkUrl": "https://github.com/VibingDroid/Vibenance/releases/download/v1.0.6/vibenance-arm64-v8a.apk",
   "changelog": "### Changed\n- **Ajustes y estabilidad:** refinamiento de la configuración de notificaciones y optimizaciones generales de la interfaz."
 }
