@@ -302,6 +302,7 @@ class _WaterflyAppState extends State<WaterflyApp> {
                 repository: TrRepositoryImpl(
                   client: TrBridgeApiClient(),
                   cacheService: TrLocalCacheService(),
+                  settingsProvider: _settingsProvider,
                 ),
               ),
             ),

@@ -2,6 +2,7 @@ import 'package:chopper/chopper.dart' show Response;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:vibenance/auth.dart';
+import 'package:vibenance/features/trade_republic/presentation/screens/tr_settings_section.dart';
 import 'package:vibenance/generated/swagger_fireflyiii_api/firefly_iii.swagger.dart';
 import 'package:vibenance/settings.dart';
 
@@ -136,6 +137,8 @@ class _InvestmentsSettingsSectionState
             ),
           const SizedBox(height: 12),
         ],
+        const Divider(),
+        const TrSettingsSection(),
       ],
     );
   }
