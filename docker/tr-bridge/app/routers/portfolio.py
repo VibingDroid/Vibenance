@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime, timezone
 from typing import Any, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, status
@@ -15,7 +16,21 @@ from ..schemas import (
 from tr_api import TrClient
 from tr_api.exceptions import SessionExpired
 
+logger = logging.getLogger("uvicorn.error")
 router = APIRouter(prefix="/api/v1", tags=["portfolio"], dependencies=[Depends(verify_api_key)])
+
+
+def _auto_refresh_session_if_needed(client: TrClient) -> bool:
+    """Try refreshing session via /api/v1/auth/web/session if WebSocket or REST fails with 401."""
+    try:
+        from tr_api.auth import refresh_session
+        res = refresh_session(client.profile)
+        if res.ok:
+            client._load_cookies()
+            return True
+    except Exception as e:
+        logger.warning(f"Automatic session refresh failed: {e}")
+    return False
 
 
 @router.get("/portfolio/snapshot", response_model=PortfolioSnapshotResponse)
@@ -30,16 +45,29 @@ def get_portfolio_snapshot(
     try:
         # Obtain snapshot with live prices and cash
         raw_data = tr_portfolio.snapshot_full(client, timeout=settings.ws_timeout)
-    except SessionExpired as e:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail={"error_code": "TR_SESSION_EXPIRED", "message": str(e)},
-        )
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail={"error_code": "SNAPSHOT_FETCH_FAILED", "message": str(e)},
-        )
+    except Exception as first_exc:
+        # Check if error is due to session expiration (WebSocket 401 or SessionExpired)
+        err_str = str(first_exc)
+        if "401" in err_str or isinstance(first_exc, SessionExpired):
+            logger.info("TR session rejected with 401, attempting auto-refresh...")
+            if _auto_refresh_session_if_needed(client):
+                try:
+                    raw_data = tr_portfolio.snapshot_full(client, timeout=settings.ws_timeout)
+                except Exception as retry_exc:
+                    raise HTTPException(
+                        status_code=status.HTTP_401_UNAUTHORIZED,
+                        detail={"error_code": "TR_SESSION_EXPIRED", "message": str(retry_exc)},
+                    )
+            else:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail={"error_code": "TR_SESSION_EXPIRED", "message": err_str},
+                )
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail={"error_code": "SNAPSHOT_FETCH_FAILED", "message": err_str},
+            )
 
     # Extract positions and cash
     positions_raw = []
@@ -185,22 +213,36 @@ def get_transactions(
 ):
     import tr_api.transactions as tr_tx
 
-    try:
+    def _fetch_tx():
         if since:
             since_dt = datetime.fromisoformat(since.replace("Z", "+00:00"))
-            raw_items = tr_tx.fetch_since(client, since_dt)
+            return tr_tx.fetch_since(client, since_dt)
+        return tr_tx.fetch_all(client, max_pages=10)
+
+    try:
+        raw_items = _fetch_tx()
+    except Exception as first_exc:
+        err_str = str(first_exc)
+        if "401" in err_str or isinstance(first_exc, SessionExpired):
+            logger.info("TR session rejected with 401 in tx, attempting auto-refresh...")
+            if _auto_refresh_session_if_needed(client):
+                try:
+                    raw_items = _fetch_tx()
+                except Exception as retry_exc:
+                    raise HTTPException(
+                        status_code=status.HTTP_401_UNAUTHORIZED,
+                        detail={"error_code": "TR_SESSION_EXPIRED", "message": str(retry_exc)},
+                    )
+            else:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail={"error_code": "TR_SESSION_EXPIRED", "message": err_str},
+                )
         else:
-            raw_items = tr_tx.fetch_all(client, max_pages=10)
-    except SessionExpired as e:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail={"error_code": "TR_SESSION_EXPIRED", "message": str(e)},
-        )
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail={"error_code": "TX_FETCH_FAILED", "message": str(e)},
-        )
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail={"error_code": "TX_FETCH_FAILED", "message": err_str},
+            )
 
     items: list[TransactionItem] = []
     for it in raw_items:
