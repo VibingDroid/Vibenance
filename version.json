@@ -1,6 +1,6 @@
 {
-  "version": "1.0.5 (build 6)",
-  "versionCode": 63,
-  "apkUrl": "https://github.com/VibingDroid/Vibenance/releases/download/v1.0.5/vibenance-arm64-v8a.apk",
-  "changelog": "### Changed\n- **Notificaciones push:** eliminación de la visualización y copia manual del token FCM en los ajustes para simplificar la interfaz y evitar exposición innecesaria de identificadores internos."
+  "version": "1.0.6 (build 7)",
+  "versionCode": 73,
+  "apkUrl": "https://github.com/VibingDroid/Vibenance/releases/download/v1.0.6/vibenance-arm64-v8a.apk",
+  "changelog": "### Changed\n- **Ajustes y estabilidad:** refinamiento de la configuración de notificaciones y optimizaciones generales de la interfaz."
 }
