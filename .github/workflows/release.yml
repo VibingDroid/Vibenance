@@ -275,8 +275,17 @@ jobs:
           INPUT_TRACK: ${{ inputs.play_track }}
         run: |
           mkdir -p whatsnew
-          cp fastlane/metadata/android/es-ES/changelogs/1.txt whatsnew/whatsnew-es-ES
-          cp fastlane/metadata/android/en-US/changelogs/1.txt whatsnew/whatsnew-en-US
+          BUILD_CODE="${{ steps.versioning.outputs.build_code }}"
+          if [[ -f "fastlane/metadata/android/es-ES/changelogs/${BUILD_CODE}.txt" ]]; then
+            cp "fastlane/metadata/android/es-ES/changelogs/${BUILD_CODE}.txt" whatsnew/whatsnew-es-ES
+          else
+            cp fastlane/metadata/android/es-ES/changelogs/1.txt whatsnew/whatsnew-es-ES
+          fi
+          if [[ -f "fastlane/metadata/android/en-US/changelogs/${BUILD_CODE}.txt" ]]; then
+            cp "fastlane/metadata/android/en-US/changelogs/${BUILD_CODE}.txt" whatsnew/whatsnew-en-US
+          else
+            cp fastlane/metadata/android/en-US/changelogs/1.txt whatsnew/whatsnew-en-US
+          fi
 
           PLAY_TRACK=$(python3 - << 'EOF'
           import json, os, time, base64, urllib.request, subprocess

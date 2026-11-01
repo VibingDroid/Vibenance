@@ -1,0 +1,1 @@
+Eliminación del token FCM de los ajustes de notificaciones push y mejoras de interfaz.

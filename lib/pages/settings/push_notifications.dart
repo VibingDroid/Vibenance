@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:vibenance/services/push_notification_service.dart';
 
@@ -16,7 +15,6 @@ class _PushNotificationsSettingsPageState
   final PushNotificationService _service = PushNotificationService();
   late Future<bool> _enabledFuture;
   late Future<bool> _permissionFuture;
-  late Future<String?> _tokenFuture;
   late Future<DateTime?> _lastSyncAtFuture;
   late Future<String?> _lastSyncErrorFuture;
 
@@ -29,14 +27,8 @@ class _PushNotificationsSettingsPageState
   void _refresh() {
     _enabledFuture = _service.isEnabled();
     _permissionFuture = _service.isSystemPermissionGranted();
-    _tokenFuture = _service.getStoredToken();
     _lastSyncAtFuture = _service.getLastSyncAt();
     _lastSyncErrorFuture = _service.getLastSyncError();
-  }
-
-  String _truncateToken(String token) {
-    if (token.length <= 24) return token;
-    return '${token.substring(0, 12)}...${token.substring(token.length - 6)}';
   }
 
   Future<void> _requestPermission() async {
@@ -50,19 +42,6 @@ class _PushNotificationsSettingsPageState
       );
     }
     setState(_refresh);
-  }
-
-  Future<void> _copyToken(String? token) async {
-    if (token == null) return;
-    await Clipboard.setData(ClipboardData(text: token));
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Token FCM copiado'),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-    }
   }
 
   Future<void> _sendTestNotification() async {
@@ -133,28 +112,6 @@ class _PushNotificationsSettingsPageState
                             : null,
                         child: const Text('SOLICITAR'),
                       ),
-              );
-            },
-          ),
-          const Divider(),
-          FutureBuilder<String?>(
-            future: _tokenFuture,
-            builder: (BuildContext context, AsyncSnapshot<String?> snapshot) {
-              final String? token = snapshot.data;
-              final String subtitle = token != null
-                  ? 'Token: ${_truncateToken(token)}'
-                  : 'Token no disponible (falta google-services.json)';
-              return ListTile(
-                title: const Text('Token FCM'),
-                subtitle: Text(subtitle),
-                leading: const CircleAvatar(child: Icon(Icons.key)),
-                trailing: token != null
-                    ? IconButton(
-                        icon: const Icon(Icons.copy),
-                        tooltip: 'Copiar token FCM',
-                        onPressed: () => _copyToken(token),
-                      )
-                    : null,
               );
             },
           ),

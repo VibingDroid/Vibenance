@@ -2,6 +2,11 @@
 
 Todas las novedades notables de Vibenance se documentan en este archivo.
 
+## [1.0.5] - 2026-11-01
+
+### Changed
+- **Notificaciones push:** eliminación de la visualización y copia manual del token FCM en los ajustes para simplificar la interfaz y evitar exposición innecesaria de identificadores internos.
+
 ## [1.0.4] - 2026-10-31
 
 ### Fixed
