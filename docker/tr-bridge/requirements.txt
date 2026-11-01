@@ -4,4 +4,5 @@ pydantic>=2.6.0
 pydantic-settings>=2.2.0
 requests>=2.31.0
 websockets>=12.0
-tr-api[browser] @ git+https://github.com/cdamken/tr-api.git@main
+playwright>=1.40.0
+git+https://github.com/cdamken/tr-api.git@main
