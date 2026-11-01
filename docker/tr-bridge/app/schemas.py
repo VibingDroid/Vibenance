@@ -21,7 +21,7 @@ class LoginResponse(BaseModel):
 
 class VerifyRequest(BaseModel):
     process_id: str
-    code: str = Field(..., description="4-digit code from TR push/SMS")
+    code: Optional[str] = Field(default="", description="4-digit code from TR SMS/push or empty if push notification confirmed in-app")
     phone_number: Optional[str] = None
 
 

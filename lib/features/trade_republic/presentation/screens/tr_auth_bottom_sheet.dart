@@ -111,13 +111,6 @@ class _TrAuthBottomSheetState extends State<TrAuthBottomSheet> {
   }
 
   Future<void> _handleStep2Submit() async {
-    if (_codeController.text.trim().length < 4) {
-      setState(() {
-        _error = 'Introduce el código de 4 dígitos';
-      });
-      return;
-    }
-
     setState(() {
       _isSubmitting = true;
       _error = null;
@@ -270,7 +263,7 @@ class _TrAuthBottomSheetState extends State<TrAuthBottomSheet> {
                 ),
               ] else ...<Widget>[
                 Text(
-                  'Se ha enviado una notificación push a tu app de Trade Republic. Confírmala o introduce el código de 4 dígitos que aparece en pantalla:',
+                  'Abre tu app de Trade Republic y confirma la notificación de inicio de sesión. Cuando la hayas aprobado, pulsa el botón de abajo (o escribe el código si tu app muestra uno):',
                   style: theme.textTheme.bodyMedium,
                 ),
                 const SizedBox(height: 16),
@@ -288,7 +281,8 @@ class _TrAuthBottomSheetState extends State<TrAuthBottomSheet> {
                     LengthLimitingTextInputFormatter(4),
                   ],
                   decoration: const InputDecoration(
-                    labelText: 'Código 2FA (4 dígitos)',
+                    labelText: 'Código 2FA (opcional)',
+                    hintText: '----',
                     border: OutlineInputBorder(),
                   ),
                 ),
