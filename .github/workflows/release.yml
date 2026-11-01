@@ -117,7 +117,7 @@ jobs:
             CHANNEL="stable"
           fi
 
-          if [[ -z "$TAG_NAME" || "$TAG_NAME" == "main" || "$TAG_NAME" == "develop" || "$TAG_NAME" == "beta" ]]; then
+          if [[ -z "$TAG_NAME" || "$TAG_NAME" == "main" || "$TAG_NAME" == "develop" || "$TAG_NAME" == "beta" || "$TAG_NAME" == *"/"* || ! "$TAG_NAME" =~ ^v[0-9] ]]; then
             TAG_NAME="v$(echo "$PUBSPEC_VER" | cut -d'+' -f1)"
           fi
           CLEAN_VER=$(echo "$TAG_NAME" | sed 's/^v//' | cut -d'+' -f1)
@@ -129,7 +129,7 @@ jobs:
           else
             BUILD_CODE=${{ github.run_number }}
           fi
-          sed -i "s/^version: .*/version: $CLEAN_VER+$BUILD_CODE/" pubspec.yaml
+          sed -i "s|^version: .*|version: $CLEAN_VER+$BUILD_CODE|" pubspec.yaml
           mkdir -p dist
           echo "channel=$CHANNEL" >> $GITHUB_OUTPUT
           echo "flavor=$CHANNEL" >> $GITHUB_OUTPUT
