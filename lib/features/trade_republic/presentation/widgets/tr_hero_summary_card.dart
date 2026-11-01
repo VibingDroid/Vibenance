@@ -3,11 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:vibenance/features/trade_republic/data/models/tr_snapshot_model.dart';
 
 class TrHeroSummaryCard extends StatelessWidget {
-  const TrHeroSummaryCard({
-    super.key,
-    required this.summary,
-    this.lastUpdated,
-  });
+  const TrHeroSummaryCard({super.key, required this.summary, this.lastUpdated});
 
   final TrPortfolioSummary summary;
   final DateTime? lastUpdated;
@@ -22,7 +18,9 @@ class TrHeroSummaryCard extends StatelessWidget {
     );
 
     final bool isPositive = summary.profitLossAbs >= 0;
-    final Color plColor = isPositive ? Colors.green.shade700 : Colors.red.shade700;
+    final Color plColor = isPositive
+        ? Colors.green.shade700
+        : Colors.red.shade700;
     final String sign = isPositive ? '+' : '';
 
     return Card(

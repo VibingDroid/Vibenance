@@ -3,10 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:vibenance/features/trade_republic/data/models/tr_snapshot_model.dart';
 
 class TrPositionCard extends StatelessWidget {
-  const TrPositionCard({
-    super.key,
-    required this.position,
-  });
+  const TrPositionCard({super.key, required this.position});
 
   final TrPositionModel position;
 
@@ -20,7 +17,9 @@ class TrPositionCard extends StatelessWidget {
     );
 
     final bool isPositive = position.profitLossAbs >= 0;
-    final Color plColor = isPositive ? Colors.green.shade700 : Colors.red.shade700;
+    final Color plColor = isPositive
+        ? Colors.green.shade700
+        : Colors.red.shade700;
     final String sign = isPositive ? '+' : '';
 
     IconData typeIcon = Icons.show_chart;

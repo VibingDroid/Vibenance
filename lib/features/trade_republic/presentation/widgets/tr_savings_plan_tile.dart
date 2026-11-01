@@ -3,10 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:vibenance/features/trade_republic/data/models/tr_snapshot_model.dart';
 
 class TrSavingsPlanTile extends StatelessWidget {
-  const TrSavingsPlanTile({
-    super.key,
-    required this.plan,
-  });
+  const TrSavingsPlanTile({super.key, required this.plan});
 
   final TrSavingsPlanModel plan;
 
@@ -46,10 +43,7 @@ class TrSavingsPlanTile extends StatelessWidget {
         foregroundColor: plan.paused
             ? theme.colorScheme.onSurfaceVariant
             : theme.colorScheme.onSecondaryContainer,
-        child: Icon(
-          plan.paused ? Icons.pause : Icons.repeat,
-          size: 20,
-        ),
+        child: Icon(plan.paused ? Icons.pause : Icons.repeat, size: 20),
       ),
       title: Text(
         plan.name,

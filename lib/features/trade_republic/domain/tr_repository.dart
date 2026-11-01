@@ -31,9 +31,9 @@ class TrRepositoryImpl implements TrRepository {
     required TrBridgeApiClient client,
     required TrLocalCacheService cacheService,
     SettingsProvider? settingsProvider,
-  })  : _client = client,
-        _cacheService = cacheService,
-        _settings = settingsProvider ?? SettingsProvider();
+  }) : _client = client,
+       _cacheService = cacheService,
+       _settings = settingsProvider ?? SettingsProvider();
 
   final TrBridgeApiClient _client;
   final TrLocalCacheService _cacheService;
@@ -71,7 +71,10 @@ class TrRepositoryImpl implements TrRepository {
     await _settings.setTrBridgeApiKey(config.bridgeApiKey);
     await _settings.setTrFireflyAccountId(config.fireflyAssetAccountId);
     _currentConfig = config;
-    _client.updateConfig(baseUrl: config.bridgeUrl, apiKey: config.bridgeApiKey);
+    _client.updateConfig(
+      baseUrl: config.bridgeUrl,
+      apiKey: config.bridgeApiKey,
+    );
     _hasLoadedConfig = true;
   }
 
@@ -91,10 +94,7 @@ class TrRepositoryImpl implements TrRepository {
     if (baseUrl == null && _client.baseUrl.isEmpty) {
       await _ensureConfigLoaded();
     }
-    return _client.checkHealth(
-      overrideUrl: baseUrl,
-      overrideApiKey: apiKey,
-    );
+    return _client.checkHealth(overrideUrl: baseUrl, overrideApiKey: apiKey);
   }
 
   @override
@@ -137,11 +137,7 @@ class TrRepositoryImpl implements TrRepository {
     String? phone,
   }) async {
     await _ensureConfigLoaded();
-    return _client.verify(
-      processId: processId,
-      code: code,
-      phoneNumber: phone,
-    );
+    return _client.verify(processId: processId, code: code, phoneNumber: phone);
   }
 
   @override

@@ -5,26 +5,29 @@ import 'package:vibenance/features/trade_republic/data/models/tr_transaction_mod
 
 void main() {
   group('Trade Republic Models Test', () {
-    test('TrConfigModel serialization excludes sensitive keys and parses correctly', () {
-      const TrConfigModel config = TrConfigModel(
-        isEnabled: true,
-        bridgeUrl: 'https://tr-bridge.example.com',
-        bridgeApiKey: 'secret-key-123',
-        fireflyAssetAccountId: '42',
-      );
+    test(
+      'TrConfigModel serialization excludes sensitive keys and parses correctly',
+      () {
+        const TrConfigModel config = TrConfigModel(
+          isEnabled: true,
+          bridgeUrl: 'https://tr-bridge.example.com',
+          bridgeApiKey: 'secret-key-123',
+          fireflyAssetAccountId: '42',
+        );
 
-      final Map<String, dynamic> json = config.toJson();
-      expect(json['is_enabled'], isTrue);
-      expect(json['bridge_url'], 'https://tr-bridge.example.com');
-      expect(json['firefly_asset_account_id'], '42');
-      // API key must never be exported in toJson
-      expect(json.containsKey('bridge_api_key'), isFalse);
+        final Map<String, dynamic> json = config.toJson();
+        expect(json['is_enabled'], isTrue);
+        expect(json['bridge_url'], 'https://tr-bridge.example.com');
+        expect(json['firefly_asset_account_id'], '42');
+        // API key must never be exported in toJson
+        expect(json.containsKey('bridge_api_key'), isFalse);
 
-      final TrConfigModel copy = config.copyWith(isEnabled: false);
-      expect(copy.isEnabled, isFalse);
-      expect(copy.bridgeUrl, 'https://tr-bridge.example.com');
-      expect(copy.bridgeApiKey, 'secret-key-123');
-    });
+        final TrConfigModel copy = config.copyWith(isEnabled: false);
+        expect(copy.isEnabled, isFalse);
+        expect(copy.bridgeUrl, 'https://tr-bridge.example.com');
+        expect(copy.bridgeApiKey, 'secret-key-123');
+      },
+    );
 
     test('TrSnapshotModel parses summary, positions and savings plans', () {
       final Map<String, dynamic> rawJson = <String, dynamic>{
@@ -68,7 +71,10 @@ void main() {
 
       expect(snapshot.summary.totalInvested, 1000.0);
       expect(snapshot.summary.currentValue, 1250.50);
-      expect(snapshot.summary.totalPortfolioValue, 1550.50); // 1250.50 + 300 cash
+      expect(
+        snapshot.summary.totalPortfolioValue,
+        1550.50,
+      ); // 1250.50 + 300 cash
       expect(snapshot.summary.profitLossAbs, 250.50);
       expect(snapshot.summary.currency, 'EUR');
 

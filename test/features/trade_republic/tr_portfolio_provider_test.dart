@@ -54,8 +54,7 @@ class FakeTrRepository implements TrRepository {
   Future<Map<String, dynamic>> checkHealth({
     String? baseUrl,
     String? apiKey,
-  }) async =>
-      <String, dynamic>{'status': 'ok', 'authenticated': true};
+  }) async => <String, dynamic>{'status': 'ok', 'authenticated': true};
 
   @override
   Future<TrSnapshotModel> refreshSnapshot({bool enrich = true}) =>
@@ -68,16 +67,14 @@ class FakeTrRepository implements TrRepository {
   Future<Map<String, dynamic>> login({
     required String phone,
     required String pin,
-  }) async =>
-      <String, dynamic>{'process_id': 'proc-1'};
+  }) async => <String, dynamic>{'process_id': 'proc-1'};
 
   @override
   Future<Map<String, dynamic>> verify({
     required String processId,
     required String code,
     String? phone,
-  }) async =>
-      <String, dynamic>{'authenticated': true};
+  }) async => <String, dynamic>{'authenticated': true};
 
   @override
   Future<void> logout() async {
@@ -91,7 +88,9 @@ void main() {
   group('TrPortfolioProvider Tests', () {
     test('refresh updates state and handles success', () async {
       final FakeTrRepository repo = FakeTrRepository();
-      final TrPortfolioProvider provider = TrPortfolioProvider(repository: repo);
+      final TrPortfolioProvider provider = TrPortfolioProvider(
+        repository: repo,
+      );
 
       expect(provider.isLoading, isFalse);
       expect(provider.snapshot, isNull);
@@ -105,19 +104,27 @@ void main() {
     });
 
     test('handles SessionExpired exception gracefully', () async {
-      final FakeTrRepository repo = FakeTrRepository()..shouldExpireSession = true;
-      final TrPortfolioProvider provider = TrPortfolioProvider(repository: repo);
+      final FakeTrRepository repo = FakeTrRepository()
+        ..shouldExpireSession = true;
+      final TrPortfolioProvider provider = TrPortfolioProvider(
+        repository: repo,
+      );
 
       await provider.refresh();
 
       expect(provider.isSessionExpired, isTrue);
       expect(provider.isAuthenticated, isFalse);
-      expect(provider.errorMessage, anyOf(contains('Sesión expirada'), contains('caducado')));
+      expect(
+        provider.errorMessage,
+        anyOf(contains('Sesión expirada'), contains('caducado')),
+      );
     });
 
     test('logout clears snapshot and resets authentication state', () async {
       final FakeTrRepository repo = FakeTrRepository();
-      final TrPortfolioProvider provider = TrPortfolioProvider(repository: repo);
+      final TrPortfolioProvider provider = TrPortfolioProvider(
+        repository: repo,
+      );
 
       await provider.refresh();
       expect(provider.snapshot, isNotNull);

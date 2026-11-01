@@ -21,7 +21,8 @@ class TrConfigModel {
       isEnabled: isEnabled ?? this.isEnabled,
       bridgeUrl: bridgeUrl ?? this.bridgeUrl,
       bridgeApiKey: bridgeApiKey ?? this.bridgeApiKey,
-      fireflyAssetAccountId: fireflyAssetAccountId ?? this.fireflyAssetAccountId,
+      fireflyAssetAccountId:
+          fireflyAssetAccountId ?? this.fireflyAssetAccountId,
     );
   }
 
@@ -36,7 +37,10 @@ class TrConfigModel {
     };
   }
 
-  factory TrConfigModel.fromJson(Map<String, dynamic> json, {String bridgeApiKey = ''}) {
+  factory TrConfigModel.fromJson(
+    Map<String, dynamic> json, {
+    String bridgeApiKey = '',
+  }) {
     return TrConfigModel(
       isEnabled: (json['isEnabled'] ?? json['is_enabled']) as bool? ?? false,
       bridgeUrl: (json['bridgeUrl'] ?? json['bridge_url']) as String? ?? '',

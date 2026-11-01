@@ -26,8 +26,10 @@ class _TrDashboardScreenState extends State<TrDashboardScreen>
     _tabController = TabController(length: 3, vsync: this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      final TrPortfolioProvider provider =
-          Provider.of<TrPortfolioProvider>(context, listen: false);
+      final TrPortfolioProvider provider = Provider.of<TrPortfolioProvider>(
+        context,
+        listen: false,
+      );
       provider.init();
     });
   }
@@ -41,7 +43,9 @@ class _TrDashboardScreenState extends State<TrDashboardScreen>
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final TrPortfolioProvider provider = Provider.of<TrPortfolioProvider>(context);
+    final TrPortfolioProvider provider = Provider.of<TrPortfolioProvider>(
+      context,
+    );
 
     return Scaffold(
       appBar: AppBar(
@@ -130,7 +134,10 @@ class _TrDashboardScreenState extends State<TrDashboardScreen>
     );
   }
 
-  Widget _buildPortfolioTab(BuildContext context, TrPortfolioProvider provider) {
+  Widget _buildPortfolioTab(
+    BuildContext context,
+    TrPortfolioProvider provider,
+  ) {
     final TrSnapshotModel? snapshot = provider.snapshot;
     if (snapshot == null && !provider.isAuthenticated) {
       return _buildEmptyAuthState(context, provider);
@@ -159,7 +166,10 @@ class _TrDashboardScreenState extends State<TrDashboardScreen>
     );
   }
 
-  Widget _buildSavingsPlansTab(BuildContext context, TrPortfolioProvider provider) {
+  Widget _buildSavingsPlansTab(
+    BuildContext context,
+    TrPortfolioProvider provider,
+  ) {
     final TrSnapshotModel? snapshot = provider.snapshot;
     if (snapshot == null && !provider.isAuthenticated) {
       return _buildEmptyAuthState(context, provider);
@@ -185,14 +195,20 @@ class _TrDashboardScreenState extends State<TrDashboardScreen>
         children: <Widget>[
           Card(
             margin: const EdgeInsets.all(16),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Row(
                 children: <Widget>[
                   CircleAvatar(
-                    backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-                    foregroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
+                    backgroundColor: Theme.of(
+                      context,
+                    ).colorScheme.primaryContainer,
+                    foregroundColor: Theme.of(
+                      context,
+                    ).colorScheme.onPrimaryContainer,
                     child: const Icon(Icons.savings_outlined),
                   ),
                   const SizedBox(width: 16),
@@ -207,9 +223,8 @@ class _TrDashboardScreenState extends State<TrDashboardScreen>
                         const SizedBox(height: 2),
                         Text(
                           '${currencyFormat.format(monthlyTotal)} / mes',
-                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style: Theme.of(context).textTheme.titleLarge
+                              ?.copyWith(fontWeight: FontWeight.bold),
                         ),
                       ],
                     ),
@@ -261,12 +276,14 @@ class _TrDashboardScreenState extends State<TrDashboardScreen>
       child: ListView.separated(
         physics: const AlwaysScrollableScrollPhysics(),
         itemCount: txs.length,
-        separatorBuilder: (BuildContext _, int index) => const Divider(height: 1),
+        separatorBuilder: (BuildContext _, int index) =>
+            const Divider(height: 1),
         itemBuilder: (BuildContext ctx, int index) {
           final TrTransactionModel tx = txs[index];
           final bool isPositive = tx.amount >= 0;
-          final Color amountColor =
-              isPositive ? Colors.green.shade700 : theme.colorScheme.onSurface;
+          final Color amountColor = isPositive
+              ? Colors.green.shade700
+              : theme.colorScheme.onSurface;
 
           return ListTile(
             leading: CircleAvatar(
@@ -287,10 +304,7 @@ class _TrDashboardScreenState extends State<TrDashboardScreen>
             ),
             trailing: Text(
               currencyFormat.format(tx.amount),
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: amountColor,
-              ),
+              style: TextStyle(fontWeight: FontWeight.bold, color: amountColor),
             ),
           );
         },
@@ -298,7 +312,10 @@ class _TrDashboardScreenState extends State<TrDashboardScreen>
     );
   }
 
-  Widget _buildEmptyAuthState(BuildContext context, TrPortfolioProvider provider) {
+  Widget _buildEmptyAuthState(
+    BuildContext context,
+    TrPortfolioProvider provider,
+  ) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -313,9 +330,9 @@ class _TrDashboardScreenState extends State<TrDashboardScreen>
             const SizedBox(height: 16),
             Text(
               'Conecta tu cuenta de Trade Republic',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Text(

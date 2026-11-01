@@ -10,12 +10,13 @@ class TrApiException implements Exception {
   final int? statusCode;
 
   @override
-  String toString() => 'TrApiException($errorCode, status: $statusCode): $message';
+  String toString() =>
+      'TrApiException($errorCode, status: $statusCode): $message';
 }
 
 class TrSessionExpiredException extends TrApiException {
   const TrSessionExpiredException(super.message, {super.statusCode = 401})
-      : super(errorCode: 'TR_SESSION_EXPIRED');
+    : super(errorCode: 'TR_SESSION_EXPIRED');
 }
 
 class TrBridgeApiClient {
@@ -23,9 +24,9 @@ class TrBridgeApiClient {
     String baseUrl = '',
     String apiKey = '',
     http.Client? httpClient,
-  })  : _baseUrl = baseUrl.replaceAll(RegExp(r'/+$'), ''),
-        _apiKey = apiKey,
-        _client = httpClient ?? http.Client();
+  }) : _baseUrl = baseUrl.replaceAll(RegExp(r'/+$'), ''),
+       _apiKey = apiKey,
+       _client = httpClient ?? http.Client();
 
   String _baseUrl;
   String _apiKey;
@@ -44,10 +45,10 @@ class TrBridgeApiClient {
   }
 
   Map<String, String> get _headers => <String, String>{
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        if (_apiKey.isNotEmpty) 'X-Bridge-Api-Key': _apiKey,
-      };
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+    if (_apiKey.isNotEmpty) 'X-Bridge-Api-Key': _apiKey,
+  };
 
   Uri _buildUri(String path, [Map<String, dynamic>? queryParameters]) {
     final String cleanPath = path.startsWith('/') ? path : '/$path';
@@ -89,10 +90,7 @@ class TrBridgeApiClient {
 
   Future<bool> healthCheck({String? testUrl, String? testApiKey}) async {
     try {
-      await checkHealth(
-        overrideUrl: testUrl,
-        overrideApiKey: testApiKey,
-      );
+      await checkHealth(overrideUrl: testUrl, overrideApiKey: testApiKey);
       return true;
     } catch (_) {
       return false;
@@ -178,8 +176,10 @@ class TrBridgeApiClient {
       return <TrTransactionModel>[];
     }
     return items
-        .map((dynamic it) =>
-            TrTransactionModel.fromJson(it as Map<String, dynamic>))
+        .map(
+          (dynamic it) =>
+              TrTransactionModel.fromJson(it as Map<String, dynamic>),
+        )
         .toList();
   }
 
@@ -200,12 +200,15 @@ class TrBridgeApiClient {
       return body;
     }
 
-    final String? errorCode = body['error_code'] as String? ??
+    final String? errorCode =
+        body['error_code'] as String? ??
         (body['detail'] is Map ? body['detail']['error_code'] : null);
-    final String message = body['message'] as String? ??
+    final String message =
+        body['message'] as String? ??
         (body['detail'] is Map
             ? body['detail']['message']
-            : (body['detail']?.toString() ?? 'HTTP error ${response.statusCode}'));
+            : (body['detail']?.toString() ??
+                  'HTTP error ${response.statusCode}'));
 
     if (response.statusCode == 401 && errorCode == 'TR_SESSION_EXPIRED') {
       throw TrSessionExpiredException(message, statusCode: response.statusCode);

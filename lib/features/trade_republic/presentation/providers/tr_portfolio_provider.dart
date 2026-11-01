@@ -8,7 +8,8 @@ import 'package:vibenance/features/trade_republic/domain/tr_repository.dart';
 final Logger _log = Logger('TR.PortfolioProvider');
 
 class TrPortfolioProvider extends ChangeNotifier {
-  TrPortfolioProvider({required TrRepository repository}) : _repository = repository;
+  TrPortfolioProvider({required TrRepository repository})
+    : _repository = repository;
 
   final TrRepository _repository;
   TrRepository get repository => _repository;
@@ -67,7 +68,7 @@ class TrPortfolioProvider extends ChangeNotifier {
         _snapshot = await _repository.refreshSnapshot();
         _lastRefreshedAt = _snapshot!.fetchedAt;
         _isSessionExpired = false;
-        
+
         // Load transactions in background
         try {
           _transactions = await _repository.getTransactions();
@@ -81,7 +82,8 @@ class TrPortfolioProvider extends ChangeNotifier {
       _log.info('TR session expired: $e');
       _isAuthenticated = false;
       _isSessionExpired = true;
-      _errorMessage = 'Tu sesión en Trade Republic ha caducado. Vuelve a iniciar sesión.';
+      _errorMessage =
+          'Tu sesión en Trade Republic ha caducado. Vuelve a iniciar sesión.';
     } on TrApiException catch (e) {
       _log.warning('TR API error: $e');
       _errorMessage = e.message;
@@ -94,12 +96,18 @@ class TrPortfolioProvider extends ChangeNotifier {
     }
   }
 
-  Future<Map<String, dynamic>> login({required String phone, required String pin}) async {
+  Future<Map<String, dynamic>> login({
+    required String phone,
+    required String pin,
+  }) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
     try {
-      final Map<String, dynamic> result = await _repository.login(phone: phone, pin: pin);
+      final Map<String, dynamic> result = await _repository.login(
+        phone: phone,
+        pin: pin,
+      );
       return result;
     } finally {
       _isLoading = false;

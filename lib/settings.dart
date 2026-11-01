@@ -1000,7 +1000,8 @@ class SettingsProvider with ChangeNotifier {
   }
 
   Future<bool> get trIntegrationEnabled async =>
-      (await SharedPreferencesAsync().getBool(settingTrIntegrationEnabled)) ?? false;
+      (await SharedPreferencesAsync().getBool(settingTrIntegrationEnabled)) ??
+      false;
   Future<void> setTrIntegrationEnabled(bool value) async {
     _trIntegrationEnabled = value;
     await SharedPreferencesAsync().setBool(settingTrIntegrationEnabled, value);
@@ -1014,7 +1015,8 @@ class SettingsProvider with ChangeNotifier {
   }
 
   Future<String> get trBridgeApiKey async =>
-      (await const FlutterSecureStorage().read(key: settingTrBridgeApiKey)) ?? '';
+      (await const FlutterSecureStorage().read(key: settingTrBridgeApiKey)) ??
+      '';
   Future<void> setTrBridgeApiKey(String value) async {
     await const FlutterSecureStorage().write(
       key: settingTrBridgeApiKey,
@@ -1028,7 +1030,10 @@ class SettingsProvider with ChangeNotifier {
     if (value == null || value.isEmpty) {
       await SharedPreferencesAsync().remove(settingTrFireflyAccountId);
     } else {
-      await SharedPreferencesAsync().setString(settingTrFireflyAccountId, value);
+      await SharedPreferencesAsync().setString(
+        settingTrFireflyAccountId,
+        value,
+      );
     }
   }
 

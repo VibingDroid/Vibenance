@@ -4,14 +4,14 @@ import 'package:flutter/services.dart';
 import 'package:vibenance/features/trade_republic/presentation/providers/tr_portfolio_provider.dart';
 
 class TrAuthBottomSheet extends StatefulWidget {
-  const TrAuthBottomSheet({
-    super.key,
-    required this.provider,
-  });
+  const TrAuthBottomSheet({super.key, required this.provider});
 
   final TrPortfolioProvider provider;
 
-  static Future<bool?> show(BuildContext context, TrPortfolioProvider provider) {
+  static Future<bool?> show(
+    BuildContext context,
+    TrPortfolioProvider provider,
+  ) {
     return showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
@@ -19,9 +19,7 @@ class TrAuthBottomSheet extends StatefulWidget {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (BuildContext ctx) => Padding(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(ctx).viewInsets.bottom,
-        ),
+        padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
         child: TrAuthBottomSheet(provider: provider),
       ),
     );
@@ -94,7 +92,9 @@ class _TrAuthBottomSheetState extends State<TrAuthBottomSheet> {
         _startCountdown(countdown);
       } else {
         setState(() {
-          _error = res['message'] as String? ?? 'No se recibió process_id del bridge';
+          _error =
+              res['message'] as String? ??
+              'No se recibió process_id del bridge';
         });
       }
     } catch (e) {
@@ -320,7 +320,9 @@ class _TrAuthBottomSheetState extends State<TrAuthBottomSheet> {
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
                       : const Icon(Icons.check),
-                  label: Text(_isSubmitting ? 'Verificando...' : 'Verificar y Conectar'),
+                  label: Text(
+                    _isSubmitting ? 'Verificando...' : 'Verificar y Conectar',
+                  ),
                 ),
                 const SizedBox(height: 8),
                 TextButton(

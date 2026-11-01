@@ -171,15 +171,19 @@ class TrSnapshotModel {
             ),
       positions: positionsJson != null
           ? positionsJson
-              .map((dynamic p) =>
-                  TrPositionModel.fromJson(p as Map<String, dynamic>))
-              .toList()
+                .map(
+                  (dynamic p) =>
+                      TrPositionModel.fromJson(p as Map<String, dynamic>),
+                )
+                .toList()
           : <TrPositionModel>[],
       savingsPlans: savingsJson != null
           ? savingsJson
-              .map((dynamic s) =>
-                  TrSavingsPlanModel.fromJson(s as Map<String, dynamic>))
-              .toList()
+                .map(
+                  (dynamic s) =>
+                      TrSavingsPlanModel.fromJson(s as Map<String, dynamic>),
+                )
+                .toList()
           : <TrSavingsPlanModel>[],
       fetchedAt: json['fetched_at'] != null
           ? DateTime.tryParse(json['fetched_at'] as String) ?? DateTime.now()
@@ -191,7 +195,9 @@ class TrSnapshotModel {
     return <String, dynamic>{
       'summary': summary.toJson(),
       'positions': positions.map((TrPositionModel p) => p.toJson()).toList(),
-      'savings_plans': savingsPlans.map((TrSavingsPlanModel s) => s.toJson()).toList(),
+      'savings_plans': savingsPlans
+          .map((TrSavingsPlanModel s) => s.toJson())
+          .toList(),
       'fetched_at': fetchedAt.toIso8601String(),
     };
   }

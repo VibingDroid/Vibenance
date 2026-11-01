@@ -42,7 +42,8 @@ void main() {
     test('login returns process_id on success', () async {
       final MockClient mockClient = MockClient((http.Request request) async {
         expect(request.url.path, '/api/v1/auth/login');
-        final Map<String, dynamic> body = jsonDecode(request.body) as Map<String, dynamic>;
+        final Map<String, dynamic> body =
+            jsonDecode(request.body) as Map<String, dynamic>;
         expect(body['phone_number'], '+34600000000');
         expect(body['pin'], '1234');
         return http.Response(
@@ -68,30 +69,33 @@ void main() {
       expect(res['process_id'], 'proc-abc-123');
     });
 
-    test('getSnapshot throws TrSessionExpiredException on 401 TR_SESSION_EXPIRED', () {
-      final MockClient mockClient = MockClient((http.Request request) {
-        return Future<http.Response>.value(
-          http.Response(
-            jsonEncode(<String, dynamic>{
-              'error_code': 'TR_SESSION_EXPIRED',
-              'message': 'Session expired',
-            }),
-            401,
-          ),
+    test(
+      'getSnapshot throws TrSessionExpiredException on 401 TR_SESSION_EXPIRED',
+      () {
+        final MockClient mockClient = MockClient((http.Request request) {
+          return Future<http.Response>.value(
+            http.Response(
+              jsonEncode(<String, dynamic>{
+                'error_code': 'TR_SESSION_EXPIRED',
+                'message': 'Session expired',
+              }),
+              401,
+            ),
+          );
+        });
+
+        final TrBridgeApiClient client = TrBridgeApiClient(
+          baseUrl: 'https://tr-bridge.local:8085',
+          apiKey: 'key',
+          httpClient: mockClient,
         );
-      });
 
-      final TrBridgeApiClient client = TrBridgeApiClient(
-        baseUrl: 'https://tr-bridge.local:8085',
-        apiKey: 'key',
-        httpClient: mockClient,
-      );
-
-      expect(
-        () => client.getSnapshot(),
-        throwsA(isA<TrSessionExpiredException>()),
-      );
-    });
+        expect(
+          () => client.getSnapshot(),
+          throwsA(isA<TrSessionExpiredException>()),
+        );
+      },
+    );
 
     test('getSnapshot parses valid snapshot JSON', () async {
       final MockClient mockClient = MockClient((http.Request request) async {

@@ -40,8 +40,10 @@ class _TrSettingsSectionState extends State<TrSettingsSection> {
   }
 
   Future<void> _loadConfig() async {
-    final TrPortfolioProvider provider =
-        Provider.of<TrPortfolioProvider>(context, listen: false);
+    final TrPortfolioProvider provider = Provider.of<TrPortfolioProvider>(
+      context,
+      listen: false,
+    );
     final TrConfigModel config = await provider.repository.loadConfig();
     if (!mounted) return;
     setState(() {
@@ -69,8 +71,10 @@ class _TrSettingsSectionState extends State<TrSettingsSection> {
       _testSuccess = null;
     });
 
-    final TrPortfolioProvider provider =
-        Provider.of<TrPortfolioProvider>(context, listen: false);
+    final TrPortfolioProvider provider = Provider.of<TrPortfolioProvider>(
+      context,
+      listen: false,
+    );
     final bool ok = await provider.repository.testConnection(
       baseUrl: _urlController.text.trim(),
       apiKey: _apiKeyController.text.trim(),
@@ -99,17 +103,18 @@ class _TrSettingsSectionState extends State<TrSettingsSection> {
     }
 
     setState(() => _isSaving = true);
-    final TrPortfolioProvider provider =
-        Provider.of<TrPortfolioProvider>(context, listen: false);
+    final TrPortfolioProvider provider = Provider.of<TrPortfolioProvider>(
+      context,
+      listen: false,
+    );
 
     final TrConfigModel newConfig = TrConfigModel(
       isEnabled: _isEnabled,
       bridgeUrl: _urlController.text.trim(),
       bridgeApiKey: _apiKeyController.text.trim(),
-      fireflyAssetAccountId:
-          _fireflyAccountController.text.trim().isEmpty
-              ? null
-              : _fireflyAccountController.text.trim(),
+      fireflyAssetAccountId: _fireflyAccountController.text.trim().isEmpty
+          ? null
+          : _fireflyAccountController.text.trim(),
     );
 
     await provider.repository.saveConfig(newConfig);
@@ -141,10 +146,7 @@ class _TrSettingsSectionState extends State<TrSettingsSection> {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Row(
               children: <Widget>[
-                Icon(
-                  Icons.candlestick_chart,
-                  color: theme.colorScheme.primary,
-                ),
+                Icon(Icons.candlestick_chart, color: theme.colorScheme.primary),
                 const SizedBox(width: 8),
                 Text(
                   'Integración Trade Republic',
@@ -216,7 +218,8 @@ class _TrSettingsSectionState extends State<TrSettingsSection> {
               child: TextFormField(
                 controller: _fireflyAccountController,
                 decoration: const InputDecoration(
-                  labelText: 'ID de cuenta de activos en Firefly III (opcional)',
+                  labelText:
+                      'ID de cuenta de activos en Firefly III (opcional)',
                   hintText: 'ej. 12',
                   prefixIcon: Icon(Icons.account_balance_wallet_outlined),
                   border: OutlineInputBorder(),
@@ -226,7 +229,10 @@ class _TrSettingsSectionState extends State<TrSettingsSection> {
             ),
             if (_testStatusMessage != null)
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 4,
+                ),
                 child: Row(
                   children: <Widget>[
                     Icon(
