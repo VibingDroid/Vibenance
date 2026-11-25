@@ -1,0 +1,1 @@
+Notificaciones push cuando haya movimientos con revisión manual pendiente en el Clasificador IA, con acceso directo a la pestaña de pendientes y control independiente en Ajustes.

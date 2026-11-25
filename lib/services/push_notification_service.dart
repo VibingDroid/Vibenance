@@ -1,3 +1,4 @@
+import 'dart:async' show unawaited;
 import 'dart:convert';
 import 'dart:io';
 
@@ -19,13 +20,42 @@ final Logger _log = Logger('PushNotificationService');
 
 const String _fcmTokenKey = 'FCM_TOKEN';
 const String _pushEnabledKey = 'push_notifications_enabled';
+const String _reviewPushEnabledKey = 'push_classifier_review_enabled';
 const String _importRunnerUrlKey = 'import_runner_url';
 const String _lastSyncAtKey = 'fcm_last_sync_at';
 const String _lastSyncErrorKey = 'fcm_last_sync_error';
+
 const String _channelId = 'fcm_movements';
 const String _channelName = 'Nuevos movimientos';
 const String _channelDescription =
     'Notificaciones push de nuevos movimientos importados';
+
+const String _reviewChannelId = 'fcm_classifier_review';
+const String _reviewChannelName = 'Clasificador IA';
+const String _reviewChannelDescription =
+    'Avisos de movimientos con revisión manual pendiente en el clasificador IA';
+
+const NotificationDetails _movementsNotificationDetails = NotificationDetails(
+  android: AndroidNotificationDetails(
+    _channelId,
+    _channelName,
+    channelDescription: _channelDescription,
+    importance: Importance.high,
+    priority: Priority.high,
+    icon: 'ic_stat_notification',
+  ),
+);
+
+const NotificationDetails _reviewNotificationDetails = NotificationDetails(
+  android: AndroidNotificationDetails(
+    _reviewChannelId,
+    _reviewChannelName,
+    channelDescription: _reviewChannelDescription,
+    importance: Importance.high,
+    priority: Priority.high,
+    icon: 'ic_stat_notification',
+  ),
+);
 
 Future<FlutterLocalNotificationsPlugin> _initNotificationsPlugin() async {
   final FlutterLocalNotificationsPlugin plugin =
@@ -41,6 +71,11 @@ Future<FlutterLocalNotificationsPlugin> _initNotificationsPlugin() async {
 Future<bool> _pushNotificationsEnabled() async {
   final SharedPreferencesAsync prefs = SharedPreferencesAsync();
   return await prefs.getBool(_pushEnabledKey) ?? true;
+}
+
+Future<bool> _reviewNotificationsEnabled() async {
+  final SharedPreferencesAsync prefs = SharedPreferencesAsync();
+  return await prefs.getBool(_reviewPushEnabledKey) ?? true;
 }
 
 String _defaultRunnerUrl(Uri? firefly) {
@@ -94,10 +129,16 @@ Future<void> _showLocalNotification(
   FlutterLocalNotificationsPlugin plugin,
   RemoteMessage message,
 ) async {
-  if (!(await _pushNotificationsEnabled())) {
+  final bool isClassifierReview =
+      PushNotificationService.isClassifierReviewData(message.data);
+  final bool allowed = isClassifierReview
+      ? await _reviewNotificationsEnabled()
+      : await _pushNotificationsEnabled();
+
+  if (!allowed) {
     _log.fine(
       () =>
-          'FCM message ${message.messageId} skipped: push notifications disabled',
+          'FCM message ${message.messageId} skipped: notification preference disabled',
     );
     return;
   }
@@ -119,21 +160,27 @@ Future<void> _showLocalNotification(
     message.messageId?.hashCode ?? DateTime.now().millisecondsSinceEpoch,
   );
 
+  final String payload = isClassifierReview
+      ? jsonEncode(const <String, String>{
+          'type': 'classifier_review',
+          'route': 'ai_categorizer',
+        })
+      : (message.data['payload'] is String
+            ? message.data['payload'] as String
+            : jsonEncode(message.data));
+
   await plugin.show(
     id: notificationId,
-    title: title ?? 'Nuevo movimiento',
+    title:
+        title ??
+        (isClassifierReview
+            ? 'Revisión pendiente en Clasificador IA'
+            : 'Nuevo movimiento'),
     body: body,
-    notificationDetails: const NotificationDetails(
-      android: AndroidNotificationDetails(
-        _channelId,
-        _channelName,
-        channelDescription: _channelDescription,
-        importance: Importance.high,
-        priority: Priority.high,
-        icon: 'ic_stat_notification',
-      ),
-    ),
-    payload: message.data['payload'] ?? message.data.toString(),
+    notificationDetails: isClassifierReview
+        ? _reviewNotificationDetails
+        : _movementsNotificationDetails,
+    payload: payload,
   );
 }
 
@@ -158,6 +205,48 @@ class PushNotificationService {
 
   bool _initialized = false;
   FlutterLocalNotificationsPlugin? _plugin;
+
+  final ValueNotifier<int> openClassifierReviewRequests = ValueNotifier<int>(0);
+  bool _pendingClassifierReviewOpen = false;
+
+  static bool isClassifierReviewData(Map<String, dynamic>? data) {
+    if (data == null || data.isEmpty) {
+      return false;
+    }
+    return data['type'] == 'classifier_review' ||
+        data['route'] == 'ai_categorizer';
+  }
+
+  static bool isClassifierReviewPayload(String? payload) {
+    if (payload == null || payload.isEmpty) {
+      return false;
+    }
+    if (payload == 'classifier_review') {
+      return true;
+    }
+    try {
+      final dynamic decoded = jsonDecode(payload);
+      if (decoded is Map<String, dynamic>) {
+        return isClassifierReviewData(decoded);
+      }
+    } catch (_) {
+      return false;
+    }
+    return false;
+  }
+
+  void requestOpenClassifierReview() {
+    _pendingClassifierReviewOpen = true;
+    openClassifierReviewRequests.value++;
+  }
+
+  bool consumePendingClassifierReview() {
+    if (!_pendingClassifierReviewOpen) {
+      return false;
+    }
+    _pendingClassifierReviewOpen = false;
+    return true;
+  }
 
   Future<void> initialize() async {
     if (_initialized) {
@@ -205,6 +294,14 @@ class PushNotificationService {
         importance: Importance.high,
       ),
     );
+    await androidPlugin?.createNotificationChannel(
+      const AndroidNotificationChannel(
+        _reviewChannelId,
+        _reviewChannelName,
+        description: _reviewChannelDescription,
+        importance: Importance.high,
+      ),
+    );
     final bool? granted = await androidPlugin?.requestNotificationsPermission();
     _log.info('Android POST_NOTIFICATIONS permission granted: $granted');
 
@@ -214,6 +311,24 @@ class PushNotificationService {
         _showLocalNotification(_plugin!, message);
       }
     });
+
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      _log.info('FCM notification opened app: ${message.messageId}');
+      if (isClassifierReviewData(message.data)) {
+        requestOpenClassifierReview();
+      }
+    });
+
+    unawaited(
+      FirebaseMessaging.instance.getInitialMessage().then((
+        RemoteMessage? message,
+      ) {
+        if (message != null && isClassifierReviewData(message.data)) {
+          _log.info('App launched from FCM classifier review notification');
+          requestOpenClassifierReview();
+        }
+      }),
+    );
 
     FirebaseMessaging.instance.onTokenRefresh.listen((String token) async {
       _log.info('FCM token refreshed');
@@ -240,6 +355,11 @@ class PushNotificationService {
   Future<bool> isEnabled() async {
     final SharedPreferencesAsync prefs = SharedPreferencesAsync();
     return await prefs.getBool(_pushEnabledKey) ?? true;
+  }
+
+  Future<bool> isReviewEnabled() async {
+    final SharedPreferencesAsync prefs = SharedPreferencesAsync();
+    return await prefs.getBool(_reviewPushEnabledKey) ?? true;
   }
 
   Future<DateTime?> getLastSyncAt() async {
@@ -298,6 +418,7 @@ class PushNotificationService {
     }
 
     final bool enabled = await isEnabled();
+    final bool reviewEnabled = await isReviewEnabled();
     final Uri url = Uri.parse('$runnerUrl/api/fcm/register');
     final Map<String, String> headers = <String, String>{
       HttpHeaders.authorizationHeader: 'Bearer $bearer',
@@ -316,6 +437,8 @@ class PushNotificationService {
           'token': token,
           'name': 'Vibenance (Android)',
           'enabled': enabled,
+          'review_enabled': reviewEnabled,
+          'channels': const <String>[_channelId, _reviewChannelId],
         }),
       );
 
@@ -341,6 +464,13 @@ class PushNotificationService {
     final SharedPreferencesAsync prefs = SharedPreferencesAsync();
     await prefs.setBool(_pushEnabledKey, enabled);
     _log.info('Push notifications enabled: $enabled');
+    await syncWithBackend();
+  }
+
+  Future<void> setReviewEnabled(bool enabled) async {
+    final SharedPreferencesAsync prefs = SharedPreferencesAsync();
+    await prefs.setBool(_reviewPushEnabledKey, enabled);
+    _log.info('Classifier review push notifications enabled: $enabled');
     await syncWithBackend();
   }
 
@@ -394,16 +524,7 @@ class PushNotificationService {
       id: _to32BitId(DateTime.now().millisecondsSinceEpoch),
       title: 'Prueba de Vibenance',
       body: 'Las notificaciones push están funcionando correctamente.',
-      notificationDetails: const NotificationDetails(
-        android: AndroidNotificationDetails(
-          _channelId,
-          _channelName,
-          channelDescription: _channelDescription,
-          importance: Importance.high,
-          priority: Priority.high,
-          icon: 'ic_stat_notification',
-        ),
-      ),
+      notificationDetails: _movementsNotificationDetails,
       payload: 'push_test',
     );
     _log.info('Test notification shown');

@@ -2,6 +2,11 @@
 
 Todas las novedades notables de Vibenance se documentan en este archivo.
 
+## [1.0.7] - 2026-11-25
+
+### Added
+- **Avisos de revisión manual en Clasificador IA:** notificaciones push dedicadas cuando haya movimientos con revisión manual pendiente en el clasificador, acceso directo a la pestaña *Pendientes* al pulsar el aviso y control independiente en Ajustes.
+
 ## [1.0.6] - 2026-11-01
 
 ### Changed

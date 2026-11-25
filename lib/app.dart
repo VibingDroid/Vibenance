@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -19,6 +18,7 @@ import 'package:vibenance/pages/login.dart';
 import 'package:vibenance/pages/navigation.dart';
 import 'package:vibenance/pages/splash.dart';
 import 'package:vibenance/pages/transaction.dart';
+import 'package:vibenance/services/push_notification_service.dart';
 import 'package:vibenance/theme.dart';
 import 'package:vibenance/settings.dart';
 import 'package:vibenance/updater.dart';
@@ -86,9 +86,12 @@ class _WaterflyAppState extends State<WaterflyApp> {
       if ((details?.didNotificationLaunchApp ?? false) &&
           (details?.notificationResponse?.payload?.isNotEmpty ?? false)) {
         log.info("Was launched from notification!");
-        _notificationPayload = .fromJson(
-          jsonDecode(details!.notificationResponse!.payload!),
-        );
+        final String payload = details!.notificationResponse!.payload!;
+        if (PushNotificationService.isClassifierReviewPayload(payload)) {
+          PushNotificationService().requestOpenClassifierReview();
+        } else {
+          _notificationPayload = tryParseNotificationTransaction(payload);
+        }
       }
     });
   }

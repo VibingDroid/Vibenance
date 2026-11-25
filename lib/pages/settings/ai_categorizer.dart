@@ -1,8 +1,12 @@
+import 'dart:io' show Platform;
+
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
 import 'package:vibenance/pages/settings.dart';
 import 'package:vibenance/services/ai_categorizer.dart';
+import 'package:vibenance/services/push_notification_service.dart';
 import 'package:vibenance/settings.dart';
 
 final Logger log = Logger("Pages.Settings.AICategorizer");
@@ -22,12 +26,16 @@ class _AICategorizerSettingsSectionState
   final FocusNode _urlFocusNode = FocusNode();
   final FocusNode _keyFocusNode = FocusNode();
   bool _testing = false;
+  Future<bool>? _reviewPushFuture;
 
   @override
   void initState() {
     super.initState();
     _urlFocusNode.addListener(_onUrlFocusChange);
     _keyFocusNode.addListener(_onKeyFocusChange);
+    if (!kIsWeb && Platform.isAndroid) {
+      _reviewPushFuture = PushNotificationService().isReviewEnabled();
+    }
   }
 
   @override
@@ -153,6 +161,40 @@ class _AICategorizerSettingsSectionState
           onChanged: (bool value) => settings.setAICategorizerEnabled(value),
         ),
         if (enabled) ...<Widget>[
+          if (!kIsWeb && Platform.isAndroid && _reviewPushFuture != null)
+            FutureBuilder<bool>(
+              future: _reviewPushFuture,
+              builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
+                final bool notifyReview = snapshot.data ?? true;
+                return SwitchListTile.adaptive(
+                  title: const Text("Notificar revisiones pendientes"),
+                  subtitle: const Text(
+                    "Recibir aviso push cuando haya movimientos con revisión manual pendiente",
+                  ),
+                  value: notifyReview,
+                  secondary: CircleAvatar(
+                    child: Icon(
+                      notifyReview
+                          ? Icons.notifications_active_outlined
+                          : Icons.notifications_off_outlined,
+                    ),
+                  ),
+                  onChanged: snapshot.connectionState == ConnectionState.done
+                      ? (bool value) async {
+                          await PushNotificationService().setReviewEnabled(
+                            value,
+                          );
+                          if (mounted) {
+                            setState(() {
+                              _reviewPushFuture = PushNotificationService()
+                                  .isReviewEnabled();
+                            });
+                          }
+                        }
+                      : null,
+                );
+              },
+            ),
           Padding(
             padding: const EdgeInsets.symmetric(
               horizontal: 24.0,

@@ -14,6 +14,7 @@ class _PushNotificationsSettingsPageState
     extends State<PushNotificationsSettingsPage> {
   final PushNotificationService _service = PushNotificationService();
   late Future<bool> _enabledFuture;
+  late Future<bool> _reviewEnabledFuture;
   late Future<bool> _permissionFuture;
   late Future<DateTime?> _lastSyncAtFuture;
   late Future<String?> _lastSyncErrorFuture;
@@ -26,6 +27,7 @@ class _PushNotificationsSettingsPageState
 
   void _refresh() {
     _enabledFuture = _service.isEnabled();
+    _reviewEnabledFuture = _service.isReviewEnabled();
     _permissionFuture = _service.isSystemPermissionGranted();
     _lastSyncAtFuture = _service.getLastSyncAt();
     _lastSyncErrorFuture = _service.getLastSyncError();
@@ -85,6 +87,33 @@ class _PushNotificationsSettingsPageState
                 onChanged: snapshot.connectionState == ConnectionState.done
                     ? (bool value) async {
                         await _service.setEnabled(value);
+                        setState(_refresh);
+                      }
+                    : null,
+              );
+            },
+          ),
+          const Divider(),
+          FutureBuilder<bool>(
+            future: _reviewEnabledFuture,
+            builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
+              final bool reviewEnabled = snapshot.data ?? true;
+              return SwitchListTile.adaptive(
+                title: const Text('Revisiones pendientes del clasificador'),
+                subtitle: const Text(
+                  'Recibe una notificación cuando haya movimientos con revisión manual pendiente en el clasificador IA.',
+                ),
+                value: reviewEnabled,
+                secondary: CircleAvatar(
+                  child: Icon(
+                    reviewEnabled
+                        ? Icons.auto_awesome
+                        : Icons.notifications_off_outlined,
+                  ),
+                ),
+                onChanged: snapshot.connectionState == ConnectionState.done
+                    ? (bool value) async {
+                        await _service.setReviewEnabled(value);
                         setState(_refresh);
                       }
                     : null,

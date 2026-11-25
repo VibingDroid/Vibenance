@@ -14,6 +14,7 @@ import 'package:vibenance/app.dart';
 import 'package:vibenance/auth.dart';
 import 'package:vibenance/generated/swagger_fireflyiii_api/firefly_iii.swagger.dart';
 import 'package:vibenance/pages/transaction.dart';
+import 'package:vibenance/services/push_notification_service.dart';
 import 'package:vibenance/settings.dart';
 
 final Logger log = Logger("NotificationListener");
@@ -297,18 +298,44 @@ Future<void> nlInit() async {
   await NotificationServicePlugin.instance.initialize(nlCallback);
 }
 
+NotificationTransaction? tryParseNotificationTransaction(String? payload) {
+  if (payload == null || payload.isEmpty) {
+    return null;
+  }
+  try {
+    final dynamic decoded = jsonDecode(payload);
+    if (decoded is Map<String, dynamic> &&
+        decoded['appName'] is String &&
+        decoded['title'] is String &&
+        decoded['body'] is String &&
+        decoded['date'] is String) {
+      return NotificationTransaction.fromJson(decoded);
+    }
+  } catch (_) {
+    // Payload belongs to another notification type (e.g. FCM or test)
+  }
+  return null;
+}
+
 Future<void> nlNotificationTap(
   NotificationResponse notificationResponse,
 ) async {
   log.finest(() => "nlNotificationTap()");
-  if (notificationResponse.payload?.isEmpty ?? true) {
+  final String? payload = notificationResponse.payload;
+  if (payload == null || payload.isEmpty) {
+    return;
+  }
+  if (PushNotificationService.isClassifierReviewPayload(payload)) {
+    PushNotificationService().requestOpenClassifierReview();
+    return;
+  }
+  final NotificationTransaction? tx = tryParseNotificationTransaction(payload);
+  if (tx == null || navigatorKey.currentState == null) {
     return;
   }
   await showDialog(
     context: navigatorKey.currentState!.context,
-    builder: (BuildContext context) => TransactionPage(
-      notification: .fromJson(jsonDecode(notificationResponse.payload!)),
-    ),
+    builder: (BuildContext context) => TransactionPage(notification: tx),
   );
 }
 

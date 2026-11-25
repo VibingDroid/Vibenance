@@ -1,0 +1,1 @@
+Push notifications for transactions pending manual review in the AI Categorizer, with direct navigation to the pending review tab and independent settings toggle.

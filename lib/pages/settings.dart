@@ -294,10 +294,26 @@ class SettingsPageState extends State<SettingsPage>
                   );
                 },
           ),
-          FutureBuilder<bool>(
-            future: PushNotificationService().isEnabled(),
-            builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
-              final bool enabled = snapshot.data ?? true;
+          FutureBuilder<List<bool>>(
+            future: Future.wait<bool>(<Future<bool>>[
+              PushNotificationService().isEnabled(),
+              PushNotificationService().isReviewEnabled(),
+            ]),
+            builder: (BuildContext context, AsyncSnapshot<List<bool>> snapshot) {
+              final bool movEnabled = snapshot.data?[0] ?? true;
+              final bool revEnabled = snapshot.data?[1] ?? true;
+              final String pushSubtitle;
+              if (movEnabled && revEnabled) {
+                pushSubtitle =
+                    "Activado • Nuevos movimientos y revisiones del clasificador";
+              } else if (movEnabled) {
+                pushSubtitle = "Activado • Solo nuevos movimientos importados";
+              } else if (revEnabled) {
+                pushSubtitle =
+                    "Activado • Solo revisiones pendientes del clasificador";
+              } else {
+                pushSubtitle = "Desactivado • Sin avisos push automáticos";
+              }
               return OpenContainer(
                 openBuilder: (BuildContext context, Function closedContainer) =>
                     const PushNotificationsSettingsPage(),
@@ -306,13 +322,8 @@ class SettingsPageState extends State<SettingsPage>
                 closedElevation: 0,
                 closedBuilder: (BuildContext context, Function openContainer) =>
                     ListTile(
-                      title: const Text("Avisos de nuevos movimientos"),
-                      subtitle: Text(
-                        enabled
-                            ? "Activado • Notificaciones push al importar transacciones"
-                            : "Desactivado • Notificaciones push al importar transacciones",
-                        maxLines: 2,
-                      ),
+                      title: const Text("Notificaciones push"),
+                      subtitle: Text(pushSubtitle, maxLines: 2),
                       leading: const CircleAvatar(
                         child: Icon(Icons.notifications_active_outlined),
                       ),

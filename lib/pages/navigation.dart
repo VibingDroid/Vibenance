@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
 import 'package:vibenance/animations.dart';
+import 'package:vibenance/app.dart' show navigatorKey;
 import 'package:vibenance/auth.dart';
 import 'package:vibenance/generated/l10n/app_localizations.dart';
 import 'package:vibenance/layout.dart';
@@ -13,6 +14,7 @@ import 'package:vibenance/pages/home.dart';
 import 'package:vibenance/pages/piggybanks.dart';
 import 'package:vibenance/pages/settings.dart';
 import 'package:vibenance/pages/settings/importer.dart';
+import 'package:vibenance/services/push_notification_service.dart';
 import 'package:vibenance/settings.dart';
 import 'package:vibenance/widgets/logo.dart';
 
@@ -96,12 +98,88 @@ class NavPageState extends State<NavPage> with TickerProviderStateMixin {
   final Logger log = Logger("Pages.Navigation.Page");
 
   int screenIndex = 0;
+  int _categorizerReloadSeed = 0;
+  NavPageElements? _navElements;
   late List<NavDestination> navDestinations;
 
-  List<NavDestination> _buildNavDestinations(BuildContext context) {
-    final bool aiEnabled = context
-        .watch<SettingsProvider>()
-        .aiCategorizerEnabled;
+  @override
+  void initState() {
+    super.initState();
+    PushNotificationService().openClassifierReviewRequests.addListener(
+      _onOpenClassifierReviewRequested,
+    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (PushNotificationService().consumePendingClassifierReview()) {
+        _openClassifierReviewDestination();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    PushNotificationService().openClassifierReviewRequests.removeListener(
+      _onOpenClassifierReviewRequested,
+    );
+    super.dispose();
+  }
+
+  void _onOpenClassifierReviewRequested() {
+    if (PushNotificationService().consumePendingClassifierReview()) {
+      _openClassifierReviewDestination();
+    }
+  }
+
+  Future<void> _openClassifierReviewDestination() async {
+    if (!mounted) {
+      return;
+    }
+    navigatorKey.currentState?.popUntil(
+      (Route<dynamic> route) => route.isFirst,
+    );
+    final SettingsProvider settings = context.read<SettingsProvider>();
+    if (!settings.aiCategorizerEnabled &&
+        settings.aiCategorizerUrl.isNotEmpty &&
+        settings.aiCategorizerUrl != "http://127.0.0.1:3000") {
+      await settings.setAICategorizerEnabled(true);
+      if (!mounted) {
+        return;
+      }
+    }
+    final List<NavDestination> destinations = _buildNavDestinations(
+      context,
+      watchSettings: false,
+    );
+    final int aiIndex = destinations.indexWhere(
+      (NavDestination d) => d.pageHandler is AICategorizerPage,
+    );
+    if (aiIndex != -1) {
+      _navElements?.appBarActions = null;
+      _navElements?.appBarBottom = null;
+      _navElements?.fab = null;
+      _navElements?.appBarTitle = Text(destinations[aiIndex].label);
+      setState(() {
+        _categorizerReloadSeed++;
+        screenIndex = aiIndex;
+      });
+    } else if (navigatorKey.currentState != null) {
+      navigatorKey.currentState!.push(
+        MaterialPageRoute<void>(
+          builder: (BuildContext context) => Scaffold(
+            appBar: AppBar(title: Text(S.of(context).generalSettings)),
+            body: const SettingsPage(),
+          ),
+        ),
+      );
+    }
+  }
+
+  List<NavDestination> _buildNavDestinations(
+    BuildContext context, {
+    bool watchSettings = true,
+  }) {
+    final bool aiEnabled = watchSettings
+        ? context.watch<SettingsProvider>().aiCategorizerEnabled
+        : context.read<SettingsProvider>().aiCategorizerEnabled;
     final List<NavDestination> destinations = <NavDestination>[
       NavDestination(
         S.of(context).navigationMain,
@@ -128,11 +206,11 @@ class NavPageState extends State<NavPage> with TickerProviderStateMixin {
         const Icon(Icons.savings),
       ),
       if (aiEnabled)
-        const NavDestination(
+        NavDestination(
           "Clasificador IA",
-          AICategorizerPage(),
-          Icon(Icons.auto_awesome_outlined),
-          Icon(Icons.auto_awesome),
+          AICategorizerPage(key: ValueKey<int>(_categorizerReloadSeed)),
+          const Icon(Icons.auto_awesome_outlined),
+          const Icon(Icons.auto_awesome),
         ),
       const NavDestination(
         "Importación bancaria",
@@ -185,11 +263,15 @@ class NavPageState extends State<NavPage> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     navDestinations = _buildNavDestinations(context);
+    if (screenIndex >= navDestinations.length) {
+      screenIndex = 0;
+    }
     final NavDestination currentPage = navDestinations[screenIndex];
     log.finest(() => "nav build(page: $screenIndex)");
 
     return ChangeNotifierProvider<NavPageElements>(
-      create: (_) => NavPageElements(Text(navDestinations[0].label)),
+      create: (_) =>
+          _navElements = NavPageElements(Text(navDestinations[0].label)),
       builder: (BuildContext context, _) {
         final SettingsProvider settings = context.watch<SettingsProvider>();
         final List<Widget>? customActions = context.select(
